@@ -252,6 +252,14 @@
     last = 0;
   });
 
+  /* 第二十二轮：第二屏完全盖住首页之后继续渲染就是纯浪费。scroll.js 在盖满时
+     派发 'introcover'（detail=true=被盖住）。恢复时 last 归零，否则累积的
+     dt 会让动画跳一大段。 */
+  document.addEventListener('introcover', function (e) {
+    running = !document.hidden && !e.detail;
+    last = 0;
+  });
+
   function frame(now) {
     requestAnimationFrame(frame);
     if (!running) return;

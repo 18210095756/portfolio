@@ -36,29 +36,73 @@
 
 * { box-sizing: border-box; }
 
-html, body {
+/* 第二十二轮：页面从"一屏不滚"变成"两屏可滚"。
+   要点：
+   - height 从 html+body 都写 100% 改成只给 html，body 用 min-height。
+     两个都写 100% 时 body 的高度被钉死在视口高，滚动会退化成 body 内部
+     滚动（window.scrollY 恒为 0，视差就没得算了）。
+   - overflow-x 收在 html 上。只写在 body 上时，横向溢出仍会算到视口上。
+   - 滚动条自己描：整站是满幅近黑，系统那条浅色滚动条会在右边切出一道边。
+     细一点、无轨道、悬停才明显。 */
+html {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(242, 235, 220, 0.22) transparent;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(242, 235, 220, 0.16);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(242, 235, 220, 0.3); background-clip: padding-box; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--cream);
+  /* ⚠️ 这里绝对不能写 overflow-x:hidden。按 CSS 规范，一个轴上不是 visible
+     时另一个轴会被算成 auto —— body 会因此变成一个滚动容器。而 body 的高度
+     是内容撑开的（没有溢出），于是 body 自己永远不滚：里面的 position:sticky
+     就"贴"在这个不滚的滚动口上，第二屏的钉住段完全失效（实测 pin 一路跟着
+     内容往上跑，t 从 0 掉到 -810）。
+     横向裁切交给 html 那一层的 overflow-x:hidden 就够。 */
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
   background: var(--bg-deep);
 }
 
 body {
   font-family: var(--font-body);
   color: var(--cream);
-  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   cursor: default;
 }
 
-/* ---------------- Stage ---------------- */
+/* ---------------- Stage ----------------
+   第二十二轮：从 position:relative 改成 position:fixed —— 首页要钉在视口里
+   当第二屏的视差底（首页 0× 对第二屏 1×）。它是 fixed，所以不占文档流，
+   真正撑开文档高度的是 .intro 的 margin-top:100vh + height:190vh。
 
+   ⚠️ width 必须是 100% 不是 100vw：100vw 把滚动条那 8px 也算进去，
+   而 .nav（fixed，left/right:0）和 .intro 的百分比都按"去掉滚动条"的
+   视口宽算 —— 一旦 .stage 用 100vw，右上角按钮与右下角文案块会整体
+   右移 8px，和顶栏的右内边距对不上（之前四角对齐是量过的）。 */
 .stage {
-  position: relative;
-  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100vh;
   height: 100dvh;
+  z-index: 1;
   overflow: hidden;
   isolation: isolate;
   background:
@@ -205,16 +249,23 @@ body {
 /* ---------------- Top navigation ---------------- */
 
 .nav {
-  position: absolute;
+  /* 第二十二轮：从 absolute 改成 fixed，并整体搬出 .stage 成为 <body> 的直接
+     子元素 —— 这就是"最顶部的信息固定不动"。留在 .stage 里做不到：.stage 有
+     isolation:isolate，本身就是层叠上下文，里面的 z-index:6 全被困在 .stage
+     这一层，而第二屏 .intro 是它的兄弟、z-index:2，会连导航一起盖住。
+     fixed 之后不依赖任何祖先，也不再随首页一起被盖。 */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  /* 导航是 .stage 的直接子元素，刻意排在 .vignette(z4) / .grain(z5) 之后 ——
-     那两层胶片处理压在 .ui-layer(z3) 上，会把整行乘到约 43%（实测
-     var(--cream)=#f2ebdc 只渲染出 104，而画面中央的大标题是 255）。右上角的
-     液金按钮最亮处因此在 110 左右就被硬顶住，着色器再亮也只是一团灰。
-     UI 外壳归 UI，胶片处理归画面。z-index 写死在这里，不依赖 DOM 顺序。 */
-  z-index: 6;
+  /* 刻意排在最上层（高于 .stage:1 / .intro:2）；.nav::before 那道压暗罩
+     在 intro.css 里用 z-index:-1 垫在本层内部的最下面，不会漏出去。 */
+  z-index: 30;
+  /* 这条的来历（第一版搬出 .ui-layer 时写的）：.vignette(z4) / .grain(z5)
+     压在 .ui-layer(z3) 之上，会把导航整行乘到约 43%（实测 var(--cream)
+     只渲染出 104，而画面中央的大标题是 255），液金按钮最亮处被硬顶成一团灰。
+     UI 外壳归 UI，胶片处理归画面 —— 现在 .nav 已经整体搬出 .stage，
+     这条层叠关系更彻底了，保留注释只为了记住当初为什么不能留在 .ui-layer。 */
   height: clamp(64px, 9vh, 96px);
   padding: 0 var(--pad-x);
   display: flex;
@@ -226,6 +277,14 @@ body {
      变形大标题（原来是从 .ui-layer 继承的 pointer-events:none 挡掉的）。
      只把真正可交互的子元素放回来。 */
   pointer-events: none;
+  /* 第三十轮：滚到第二屏时导航收紧一档（9vh→7vh），给"导航与资料卡片
+     之间留空隙"让出空间。is-intro 只挂在滚过入场段 45% 之后，首页不受
+     影响；pillnav / 液金按钮自身高度不变，变的只是这根条的上下留白。 */
+  transition: height 0.5s ease;
+}
+
+.is-intro .nav {
+  height: clamp(56px, 7vh, 84px);
 }
 
 .nav a,

@@ -1,0 +1,14 @@
+tag=gap4 viewport=1600x900
+--- home (scrollY=0) ---
+nav      t=0 b=81 h=81
+navRow   left t=23.8 l=41.6 | center t=27.3 l=756.9 | right t=23.8 l=1455.3 => ⚠ NOT one row
+--- intro (scrollY=900 isIntro=true) ---
+htmlClass=is-intro navComputedH=63px
+nav      t=0 b=63 h=63
+panel    t=88.5 l=58.3 r=1541.7 b=842.1 w=1483.5 h=753.5
+GAP nav.bottom->panel.top = 25.5px
+me       t=93.5 b=690 w=374.9 h=596.5
+loc      t=699.9 b=831.2 w=374.9 h=131.3
+me content=674/690 ok (fits)
+shots=_in_gap4.png + _in_home_gap4.png
+logs=none

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="N4y7GNbYhcyuuH3za1nLQ7">
+<head data-page-node-id="0AQwqVZs4pdoJFjy0i08w4">
+<meta charset="UTF-8" data-page-node-id="tMeHC9cOQ0P23YTg6NnSoL" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="bpGotVqTElHQXVTb6NZEC0" />
+<title>LIU YIRAN — Work Portfolio Exhibition</title>
+<meta name="description" content="Liu Yiran 个人作品集 · 3D 创意视觉与交互设计展览" data-page-node-id="Ml63SPKPApSVWrxJYSZRQ7" />
+<link rel="preconnect" href="https://fonts.googleapis.com" data-page-node-id="XKEf32EqfeYjNlEWBPvAWF" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin data-page-node-id="xVFpJ3Ey1NgQv2fSPcm1ei" />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" data-page-node-id="Cbw9OudOvYq5GIjdN8K67H" />
+<link rel="stylesheet" href="assets/css/style.css" data-page-node-id="18DgybbsYYwNCudAwDzw6P" />
+</head>
+<body data-page-node-id="sQeBG1VZ0fD7oG8m5OfS4K">
+
+<div class="stage" id="stage" data-page-node-id="v8xHmkAcrLQ4KzW0IaRmQ7">
+
+  <!-- 背景大标题（位于 3D 场景之后） -->
+  <div class="hero-title-layer" data-page-node-id="0QPcnGfSgEPzkiiGEBz1wO">
+    <h1 class="hero-title" aria-label="Work Portfolio Exhibition · Liu Yiran" data-page-node-id="KvAv6E40vbAIGlEqcc6dqN">
+      <span class="line" data-page-node-id="vkAYEzZ25GYXEqJ47evkhp">Work Portfolio</span>
+      <span class="line line--wide" data-page-node-id="eOoJVtqYrqn82ulwI9JcB2">Exhibition <span class="dot-sep" data-page-node-id="OngJCxUzNhFuiqCa3le6L0">·</span> Liu Yiran</span>
+    </h1>
+    <!-- WebGL 玻璃扭曲标题：接管上面 <h1> 的视觉，<h1> 作为无 WebGL 时的降级 -->
+    <canvas id="warp" class="warp-canvas" aria-hidden="true" data-page-node-id="JvRsrpOR7emfcaEt6HQ8b9"></canvas>
+    <div class="hero-glow" aria-hidden="true" data-page-node-id="B5MRjbVtSymWJ8qpTMJmzn"></div>
+  </div>
+
+  <!-- 3D 场景画布（透明背景，浮于标题之上、UI 之下） -->
+  <canvas id="scene" class="scene-canvas" aria-hidden="true" data-page-node-id="uZvAV4NUqQ5cqC6raneebN"></canvas>
+
+  <!-- 鼠标拖尾（浮于 3D 之上） -->
+  <canvas id="trail" class="trail-canvas" aria-hidden="true" data-page-node-id="IjJ6JnBwMG6mHSKD4dnQtc"></canvas>
+
+  <!-- 全局朦胧光晕（位于 3D 之上、UI 之下） -->
+  <div class="haze" aria-hidden="true" data-page-node-id="WF8QyMUP4VhqPmDk8WSqIy"></div>
+
+  <!-- ============ UI 层 ============ -->
+  <div class="ui-layer" data-page-node-id="91MZ0LvxpiXP96NVxEqzNp">
+
+    <!-- 左上：胶囊导航（效果参考 reactbits PillNav，悬停时一颗圆从条目底边扩张成整颗胶囊）。
+           这里原来的 WORK / CREATORS / COLLECTION / EVENTS 文字链接已移除 ——
+           它与胶囊导航同为站点导航，并排放在左上角会重复且拥挤。
+           .nav-left / .nav-link 的样式仍留在 CSS 里，要恢复只需把这几个 <a> 加回来。 -->
+
+    <!-- 左侧虚线圆环装饰 -->
+    <div class="deco-ring" aria-hidden="true" data-page-node-id="hyBuyvo1y9oXEjrDK3i0Yo">
+      <span class="deco-ring__arc" data-page-node-id="eidFgrq1fGUUzsLxyi2G8t"></span>
+    </div>
+
+    <!-- 左下：数据卡已按要求移除（.stat-card 的样式仍留在 style.css 里，
+         要恢复只需把下面这段加回来）：
+    <aside class="stat-card">
+      <div class="stat-card__head">
+        <span class="stat-card__num">48</span>
+        <span class="stat-card__label">Creative<br />Projects</span>
+      </div>
+      <div class="stat-card__foot">
+        <div class="avatar-row">
+          <span class="avatar avatar--1"></span>
+          <span class="avatar avatar--2"></span>
+          <span class="avatar avatar--3"></span>
+        </div>
+        <button class="avatar-btn" type="button" aria-label="展开作品集">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2.6l2.5 6.2 6.7.4-5.2 4.2 1.7 6.5L12 16.4l-5.7 3.5 1.7-6.5L2.8 9.2l6.7-.4z" />
+          </svg>
+        </button>
+      </div>
+    </aside>
+    -->
+
+    <!-- 「底部两个信息胶囊」已从 .ui-layer 搬出，挪到 .stage 的最顶层
+         （见下面 </header> 之后），与 .nav 同级 —— 否则 .vignette(z4)/.grain(z5)
+         把它的 SpecularButton 高光乘到只剩 40% 左右，对深底画布上读不出效果。
+         位置也一并从"底部居中"改到了左下角（左缘对齐 --pad-x）。
+         这里留注释只为了在文件中留下位置痕迹。 -->
+
+    <!-- 右下：介绍文案 -->
+    <section class="about-block" data-page-node-id="y8cBpLMvIMETNYIWkEhrAr">
+      <div class="about-block__mark" aria-hidden="true" data-page-node-id="NbeBdYdFczBs80kPGgFvih">
+        <svg viewBox="0 0 24 24" data-page-node-id="rJNEHXkADcqQi1H3yJpred">
+          <path d="M12 1.8l1.9 6.7 6.4 2.2-6.4 2.2L12 19.6l-1.9-6.7L3.7 10.7l6.4-2.2z" data-page-node-id="kgdvemzIkrYDNFxcHpMRLV" />
+        </svg>
+      </div>
+      <div class="about-block__body" data-page-node-id="PZ7EXDQNzcS1vNRA8Sa9aH">
+        <h2 class="about-block__title" data-page-node-id="ZUyq7ugIiRPbNIvGeAvdy9">刘怡然工作作品展示</h2>
+        <p class="about-block__text" data-page-node-id="6jdKueBJAqoBkJGlqzwkIb">
+          聚焦线下展厅空间下的大屏交互 UI 设计，以空间叙事重塑屏幕界面体验，兼顾硬件限制、现场访客行为与企业叙事，完成数字界面从创意到展厅现场落地。
+        </p>
+      </div>
+    </section>
+
+    <!-- 「Drag to rotate」提示行已按要求移除（.scroll-hint 的样式仍留在 style.css 里，
+         要恢复只需把下面这段加回来）：
+    <div class="scroll-hint" aria-hidden="true">
+      <span class="scroll-hint__line"></span>
+      <span class="scroll-hint__txt">Drag to rotate</span>
+    </div>
+    -->
+
+  </div>
+
+  <div class="vignette" aria-hidden="true" data-page-node-id="kGG3ACotplVCBADYtpZWPd"></div>
+  <div class="grain" aria-hidden="true" data-page-node-id="wVDQGOYt3M6XMsoZDzBRqq"></div>
+
+  <!-- ============ 导航 ============ -->
+  <!-- ⚠️ 第二十三轮：这一段已经从 .stage 里搬出去，成了 <body> 的直接子元素
+       （见 .stage 的闭合 </div> 之后）。
+
+       两个原因叠在一起，缺一不可：
+       1) 首页 .stage 被改成 position:fixed —— 它要钉在视口里当第二屏的视差底。
+       2) .stage 上有 isolation:isolate，它本身就是一个层叠上下文：里面所有
+          子元素（含 z-index:6 的 .nav）都被困在 .stage 这一层。而第二屏
+          .intro 是 .stage 的兄弟、z-index:2 —— 2 > 0，会连导航一起盖住。
+          搬出去之后 .nav 用 position:fixed + z-index:30 独立于两屏之上，
+          这就是"最顶部的信息固定不动"。
+       原来那段"防 .vignette(z4)/.grain(z5) 把导航乘到 43%"的理由仍然成立，
+       只是现在连 .stage 的层叠上下文也一并绕开了。 -->
+  <header class="nav" data-page-node-id="GxEBvRjBFTy8PEtOYVns4n">
+    <nav class="pill-nav" id="pillNav" aria-label="主导航" data-page-node-id="0guAGSWMcHjboJTeTPBEVl">
+      <a class="pill-nav__logo" href="#" aria-label="Liu Yiran · 首页" data-page-node-id="HU6a9i5F240LDqSCv14igD">
+        <svg viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="jrKzeln0oqcmFC2h1IXnNr">
+          <path d="M12 1.8l1.9 6.7 6.4 2.2-6.4 2.2L12 19.6l-1.9-6.7L3.7 10.7l6.4-2.2z" data-page-node-id="cfwP8DN3hFnwDFXa8LeKx8" />
+        </svg>
+      </a>
+      <ul class="pill-nav__list" data-page-node-id="2CyTglfp5EHGxmRNw4Objp">
+        <li data-page-node-id="XUxzrZfDPqAmf8Mj6akZay">
+          <a class="pill-nav__item is-active" href="#" data-page-node-id="dnS3YywBeEWOJIzCkslyvA">
+            <span class="pill-nav__circle" aria-hidden="true" data-page-node-id="lEIlZ8Q6up65WLWuPgPrGz"></span>
+            <span class="pill-nav__stack" data-page-node-id="tSiF4uaeoHZh9EspUTdygo">
+              <span class="pill-nav__label" data-page-node-id="HeBXRCoVspsyeoyPDcrzow">首页</span>
+              <span class="pill-nav__label-hover" aria-hidden="true" data-page-node-id="tsDBNAJSaBsoD6RJFjxtS2">首页</span>
+            </span>
+          </a>
+        </li>
+        <li data-page-node-id="dm4FNH63b5u27S2sxvXWBh">
+          <a class="pill-nav__item" href="#" data-page-node-id="4uElksnXhcnywvJJqaB734">
+            <span class="pill-nav__circle" aria-hidden="true" data-page-node-id="zKbjLD4DxQg2YW5gF1mDho"></span>
+            <span class="pill-nav__stack" data-page-node-id="4y3nfi0BWzwlD2q3xBufvI">
+              <span class="pill-nav__label" data-page-node-id="lhfihRUfhBrUVCo85xJn9m">关于我</span>
+              <span class="pill-nav__label-hover" aria-hidden="true" data-page-node-id="gTMrKbWJKGjpZfdwzJdo3E">关于我</span>
+            </span>
+          </a>
+        </li>
+        <li data-page-node-id="FS1pFzHzPUEtsO1u5aagK1">
+          <a class="pill-nav__item" href="#" data-page-node-id="dyPV7Nnedx72uxNBP0FjTP">
+            <span class="pill-nav__circle" aria-hidden="true" data-page-node-id="PKaTHau3CpYenYvDXCaZXH"></span>
+            <span class="pill-nav__stack" data-page-node-id="Pm74xGahIxgurQFBtgC4Yv">
+              <span class="pill-nav__label" data-page-node-id="nBrbYLRa0RHpM7Ctuezyn7">作品</span>
+              <span class="pill-nav__label-hover" aria-hidden="true" data-page-node-id="fybLcz1yV7qKtIFzKKrPAA">作品</span>
+            </span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <a href="#" class="brand" data-page-node-id="IuKkkI6WFC14iARsciIwGD">
+      <span class="brand-line" data-page-node-id="iKmZvQua9sP588wpXFxJPz">Liu Yiran</span>
+      <span class="brand-line brand-line--sub" data-page-node-id="3D1AZHBpf2iCeYQa5KAAKH">Portfolio</span>
+    </a>
+
+    <div class="nav-right" data-page-node-id="deJO8rCtx7QPYVyZMNgyiU">
+      <!-- 液金主按钮（效果参考 vechooool.com/projects/living-green 的 "Explore the work"）。
+           三层，顺序即层序，不要调换：
+             __plate  暗玻璃胶囊，纯 CSS —— 也是没有 WebGL2 时的兜底外观
+             __fx     WebGL2 画布，比按钮四周各外扩 --lb-glow，给辉光留位置
+             __body   标签，在流内 —— 按钮的宽度/内边距由它和 .btn-pill 的 padding 决定
+           画布绝对定位且 pointer-events:none，所以按钮在导航里占的仍是一颗胶囊。 -->
+      <button class="btn-pill btn-pill--cn btn-liquid" id="liquidBtn" type="button" data-page-node-id="lVVqaEdFjRYjonoKGBNKvj">
+        <span class="btn-liquid__plate" aria-hidden="true"></span>
+        <canvas class="btn-liquid__fx" aria-hidden="true"></canvas>
+        <span class="btn-liquid__body">
+          <span data-page-node-id="HRkuTCQnNAm94pKb6Qu8IA">联系我</span>
+          <i class="dot" aria-hidden="true" data-page-node-id="WzkX1JWcbzm4isogxIiBo7"></i>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ 左下角胶囊 ============ -->
+  <!-- 两件事一起做在这里：
+       1) 从 .ui-layer 搬出来：跟 .nav 同级、z-index:6，让高光不被 .vignette/.grain 压住。
+       2) 位置在 CSS 里改成 left:var(--pad-x)，与左上角导航、右上角按钮同一条边距线，
+          不再居中（原来的 left:50% + translateX(-50%) 已去掉）。
+       结构同 .nav：容器 pointer-events:none，胶囊本身 pointer-events:auto。 -->
+  <div class="cta-row" data-page-node-id="4RQMRZXbhBk90gGGBUFpHY">
+    <a href="#" class="btn-ghost btn-ghost--cn btn-specular" data-page-node-id="fI0C6KvdCwq0wGvkLHxDv4">
+      <canvas class="btn-specular__fx" aria-hidden="true"></canvas>
+      <span data-page-node-id="CvdEpSYZUBNwNI2oHkJc8v">上海风语筑文化科技股份有限公司</span>
+      <svg class="spark" viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="BWkIo7dPor1fp6uR9hOGWX">
+        <path d="M12 1.8l1.9 6.7 6.4 2.2-6.4 2.2L12 19.6l-1.9-6.7L3.7 10.7l6.4-2.2z" data-page-node-id="Z008OzsyEAoEkgR0f3AY1X" />
+      </svg>
+    </a>
+    <a href="#" class="btn-ghost btn-ghost--cn btn-specular" data-page-node-id="MwDlkdovcEUgCZmIhZrlHe">
+      <canvas class="btn-specular__fx" aria-hidden="true"></canvas>
+      <span data-page-node-id="xGCGwmIZacb84MFmuk4gzO">互动科技部/视觉设计师</span>
+      <svg class="spark" viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="LSRhe73UC57gXVYkIu1CDO">
+        <path d="M12 1.8l1.9 6.7 6.4 2.2-6.4 2.2L12 19.6l-1.9-6.7L3.7 10.7l6.4-2.2z" data-page-node-id="hOhwfJH67946gH8nGnOZKA" />
+      </svg>
+    </a>
+  </div>
+</div>
+
+<script src="vendor/three.min.js"></script>
+<script src="assets/js/scene.js"></script>
+<script src="assets/js/warp-text.js"></script>
+<script src="assets/js/trail.js"></script>
+<script src="assets/js/pillnav.js"></script>
+<script src="assets/js/liquid-btn.js"></script>
+<script src="assets/js/specular-btn.js"></script>
+</body>
+</html>

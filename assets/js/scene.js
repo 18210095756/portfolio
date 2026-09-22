@@ -9,6 +9,15 @@
   var canvas = document.getElementById('scene');
   if (!canvas || typeof THREE === 'undefined') return;
 
+  /* 画布铺在 .stage 上，所以一切都该按 .stage 的盒子来量，不能用
+     window.innerWidth —— 第二十二轮加了纵向滚动之后，innerWidth 会把
+     那 8px 滚动条也算进去，画布会比宿主宽 8px：渲染器尺寸和 camera.aspect
+     同时偏大，立方体在画面里会往左偏一点点。clientWidth/Height 才是
+     "去掉滚动条"的那一套，和 CSS 里 100% 的口径一致。 */
+  var stageEl = canvas.parentNode;
+  function stageW() { return (stageEl && stageEl.clientWidth) || window.innerWidth || 1; }
+  function stageH() { return (stageEl && stageEl.clientHeight) || window.innerHeight || 1; }
+
   /* r147 defaults to legacy colour mode, which treats sRGB hex values as if
      they were already linear — that is what makes pastel colours look washed
      out and grey. Enable proper colour management instead. */
@@ -637,7 +646,7 @@
 
   var shapes = [];
   var halfH = Math.tan((FOV * DEG) / 2) * CAM_Z;
-  var halfW = halfH * (window.innerWidth / window.innerHeight || 1.78);
+  var halfW = halfH * (stageW() / stageH() || 1.78);
 
   function rand(a, b) { return a + Math.random() * (b - a); }
 
@@ -836,8 +845,8 @@
   };
 
   function onMove(e) {
-    var w = window.innerWidth || 1;
-    var h = window.innerHeight || 1;
+    var w = stageW();
+    var h = stageH();
     var cx = e.clientX, cy = e.clientY;
     if (!ptr.active) { ptr.px = cx; ptr.py = cy; ptr.active = true; }
     var dx = cx - ptr.px, dy = cy - ptr.py;
@@ -858,8 +867,8 @@
   /* ---------------- Resize ---------------- */
 
   function resize() {
-    var w = window.innerWidth || 1;
-    var h = window.innerHeight || 1;
+    var w = stageW();
+    var h = stageH();
 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(w, h, false);
@@ -894,6 +903,15 @@
 
   document.addEventListener('visibilitychange', function () {
     running = !document.hidden;
+    if (running) clock.getDelta();
+  });
+
+  /* 第二十二轮：第二屏完全盖住首页之后继续渲染 WebGL 就是纯浪费 —— bloom
+     那 4 趟 mip 链 pass 是这里最贵的开销。scroll.js 在盖满时派发 'introcover'
+     （detail=true=被盖住）。恢复时必须 clock.getDelta() 把累积的 dt 吃掉，
+     否则立方体会"跳"一大段。 */
+  document.addEventListener('introcover', function (e) {
+    running = !document.hidden && !e.detail;
     if (running) clock.getDelta();
   });
 

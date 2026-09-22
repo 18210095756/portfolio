@@ -280,6 +280,14 @@
     if (running) lastT = 0;
   });
 
+  /* 第二十二轮：第二屏完全盖住首页之后继续渲染就是纯浪费（scene 的 bloom
+     有四趟 mip pass 最贵，这层拖尾其实会自己停帧，这里一并接上保持一致）。
+     scroll.js 在盖满时派发 'introcover'。恢复时 lastT 归零。 */
+  document.addEventListener('introcover', function (e) {
+    running = !document.hidden && !e.detail;
+    if (running) lastT = 0;
+  });
+
   function frame(now) {
     requestAnimationFrame(frame);
     if (!running) return;

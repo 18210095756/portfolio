@@ -1,0 +1,13 @@
+tag=gap2 viewport=1600x900
+--- home (scrollY=0) ---
+nav      t=0 b=81 h=81
+navRow   left t=undefined l=undefined | center t=undefined l=undefined | right t=23.8 l=1455.3 => ⚠ NOT one row
+--- intro (scrollY=900 isIntro=true) ---
+nav      t=0 b=81 h=81
+panel    t=98.7 l=78.4 r=1521.6 b=831.8 w=1443.2 h=733.1
+GAP nav.bottom->panel.top = 17.7px
+me       t=103.6 b=683.9 w=364.7 h=580.3
+loc      t=693.5 b=821.2 w=364.7 h=127.7
+me content=668.4/683.9 ok (fits)
+shots=_in_gap2.png + _in_home_gap2.png
+logs=none

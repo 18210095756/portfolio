@@ -1,0 +1,1136 @@
+/* ============================================================
+   intro.css — 第二屏「自我介绍」（滚动进入 + 视差）
+
+   ● 和首页的关系
+
+   .stage（首页）被改成 position:fixed —— 它不再随文档滚动。于是"往下滚"
+   读起来是这一屏从下面升上来盖住首页。首页 0× 对第二屏 1×，这层错位本身
+   就是最强的视差，而且一行 JS 都不用写。
+
+   ● 两段视差
+
+   第 1 段（滚动 0 → 100vh）＝ 入场：pin 还在视口下沿，整屏 1× 往上走，
+                              首页钉死在 0×。纯 CSS 效果，不耗 JS。
+   第 2 段（滚动 100vh → 190vh）＝ 钉住后再错速：.intro__pin 用 sticky 咬住
+                              视口，内部各层按不同倍率位移。
+
+   倍率（都乘 var(--intro-p)，scroll.js 只负责写这个 0..1 的数）：
+
+     .intro__bg       彩虹场        0.4×   位移 5vh  + 放大到 1.06
+     .intro__blobs    三团光斑      0.7×   位移 9vh
+     .ihive           蜂巢底纹      0.32×  位移 4vh（面板内）
+     .intro__stars    + 十字        0.24×  位移 3vh（身份卡内）
+     .ipass__stage    身份卡        0.19×  位移 2.4vh（面板内）
+     .intro__panel    暗色面板      ——     不动
+
+   ⚠️ 面板为什么不动：它里面全是字和卡片。给它挂 transform 会把它变成合成层，
+   滚动时 Chrome 会不停按新倍率重栅格化整块文字（每帧一次全屏重绘，越滚越糊）。
+   占位的活让背景层干 —— 背景是重度模糊的低频图，放大缩小几乎零成本。
+   面板唯一的 transform 是一次性的"落位"缩放（见 .is-intro），只在进入时跑一次。
+
+   ● 层序（都在 .intro__pin 里）
+
+     z0  .intro__bg        彩虹场
+     z1  .intro__blobs     光斑
+     z3  .intro__veil      压边（一圈很轻的暗角）
+     z4  .intro__panel     暗色 bento 面板
+     ── 面板内部另有 .intro__stars（中间那张卡的 + 十字，见 .ibox--pass）
+   ============================================================ */
+
+.intro {
+  /* 面板的边距：就是那圈"彩虹边框"的宽度。
+     参考视频里 720px 宽的画面上边框约 30px ≈ 4.2%，换算到 1600 视口约 66px；
+     第一版只给了 clamp(14px,1.9vw,30px)，那圈彩虹太窄、几乎读不出是"浮在
+     渐变上"，所以放宽到 3.6vw。 */
+  --intro-pad:    clamp(16px, 3.6vw, 58px);
+  --intro-r:      clamp(16px, 1.65vw, 26px);   /* 面板圆角 */
+  --intro-gap:    clamp(7px, 0.62vw, 11px);    /* 栏间距 / 面板内边距 */
+  --ir-in:        clamp(11px, 1.1vw, 17px);    /* 卡片圆角 */
+
+  --icard:        #121216;
+  --icard-2:      #17171c;
+  --ihair:        rgba(242, 235, 220, 0.075);
+  --ihair-2:      rgba(242, 235, 220, 0.15);
+
+  /* 由 scroll.js 写。挂在这一层（不是 :root）—— 自定义属性变一次会让用到它的
+     子树整体重算样式，挂在 :root 上等于每帧重算整页。 */
+  --intro-p: 0;
+
+  position: relative;
+  z-index: 2;
+  /* 首页是 fixed 的，不占流；第二屏从"视口下方一屏"开始，所以整段高度是
+     100vh（让位）+ 190vh（自己）。滚动 100vh 之后进入 sticky 钉住段。 */
+  margin-top: 100vh;
+  height: 190vh;
+}
+
+/* ---------------- 钉住的视口 ---------------- */
+
+.intro__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: #08080b;   /* 兜底：背景层没渲染出来也不是白屏 */
+}
+
+/* ---------------- 彩虹场 ----------------
+   马卡龙饱和色多径向叠加。位置照参考（左上蓝 / 右上紫 / 右中粉 /
+   右下品红 / 左下蜜桃 / 中间薄荷），底色再压一层斜向渐变兜底。
+   重模糊把各个径向糊成一体，不然会看出一圈一圈的边界。 */
+
+.intro__bg {
+  position: absolute;
+  inset: -16vh -8vw;
+  z-index: 0;
+  background:
+    radial-gradient(56% 44% at  4%   2%, rgba(122, 169, 240, 0.98) 0%, rgba(122, 169, 240, 0) 58%),
+    radial-gradient(50% 42% at 62%  -6%, rgba(169, 140, 240, 0.92) 0%, rgba(169, 140, 240, 0) 56%),
+    radial-gradient(46% 46% at 104%  8%, rgba(126,  96, 232, 0.95) 0%, rgba(126,  96, 232, 0) 58%),
+    radial-gradient(52% 44% at 96%  62%, rgba(246, 135, 176, 0.95) 0%, rgba(246, 135, 176, 0) 60%),
+    /* 右下角要压成参考那种品红。实测只靠斜向渐变兜底时角落偏成珊瑚橙
+       (238,114,99)，参考是 (238,20,112) —— 这颗不透明度给满、范围放大。 */
+    radial-gradient(58% 50% at 98% 108%, rgba(238,  30, 120, 1.00) 0%, rgba(238,  30, 120, 0) 64%),
+    radial-gradient(46% 38% at  8%  96%, rgba(245, 165,  82, 0.98) 0%, rgba(245, 165,  82, 0) 58%),
+    radial-gradient(44% 40% at 34%  62%, rgba( 99, 216, 189, 0.55) 0%, rgba( 99, 216, 189, 0) 62%),
+    linear-gradient(152deg, #6f8ef0 0%, #9a6ae8 30%, #d84f9f 58%, #e0559b 78%, #f2b64c 100%);
+  filter: blur(44px) saturate(1.12);
+  transform: translate3d(0, calc(var(--intro-p) * -5vh), 0) scale(calc(1 + var(--intro-p) * 0.06));
+  will-change: transform;
+}
+
+/* 三团会呼吸的光斑：让画面在静止时也有一点点活气。
+   只动 transform，交给合成器，不引起重绘。 */
+.intro__blobs {
+  position: absolute;
+  inset: -20% -10%;
+  z-index: 1;
+  filter: blur(60px);
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  transform: translate3d(0, calc(var(--intro-p) * -9vh), 0);
+  will-change: transform;
+}
+
+.intro__blob {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.intro__blob--a {
+  left: 6%; top: 10%; width: 34%; aspect-ratio: 1;
+  background: radial-gradient(closest-side, rgba(140, 180, 255, 0.55), rgba(0, 0, 0, 0) 72%);
+  animation: introBlobA 34s ease-in-out infinite;
+}
+
+.intro__blob--b {
+  right: 4%; top: 30%; width: 30%; aspect-ratio: 1;
+  background: radial-gradient(closest-side, rgba(255, 170, 210, 0.50), rgba(0, 0, 0, 0) 72%);
+  animation: introBlobB 40s ease-in-out infinite;
+}
+
+.intro__blob--c {
+  left: 28%; bottom: 2%; width: 36%; aspect-ratio: 1;
+  background: radial-gradient(closest-side, rgba(255, 190, 120, 0.42), rgba(0, 0, 0, 0) 72%);
+  animation: introBlobA 46s ease-in-out infinite reverse;
+}
+
+@keyframes introBlobA {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(4%, -3%, 0); }
+}
+
+@keyframes introBlobB {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(-5%, 4%, 0); }
+}
+
+/* ---------------- 星点层 ----------------
+   参考里那些细小的「+」十字是撒在中间那张深色卡上的，不是撒在彩虹边框上
+   （彩底上淡奶油色根本看不见）。所以这一层放在 .ibox--pass 里面，不在这里。
+   tile 200×200 里放 5 个不同大小、非对称位置的十字，平铺后看不出网格感。 */
+
+.intro__stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><g stroke='%23f2ebdc' stroke-width='1' stroke-linecap='round'><path d='M30 18v9M25.5 22.5h9' opacity='.5'/><path d='M132 52v6M129 55h6' opacity='.34'/><path d='M74 112v8M70 116h8' opacity='.46'/><path d='M176 146v5M173.5 148.5h5' opacity='.28'/><path d='M52 172v7M48.5 175.5h7' opacity='.38'/></g></svg>");
+  transform: translate3d(0, calc(var(--intro-p) * -3vh), 0);
+  will-change: transform;
+}
+
+/* 压边：只留一圈很轻的暗角，把视线往中间收。
+   第一版这里压得太狠（径向到 0.44 黑 + 上下各一道暗带），实测量出来四角
+   只剩 rgb(14,16,27) —— 彩虹被压成近黑，"浮在渐变上"这个前提就没了。
+   顶部的可读性交给 .nav::before 那道罩，不要在这里重复压。 */
+.intro__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    radial-gradient(132% 106% at 50% 48%, rgba(0, 0, 0, 0) 54%, rgba(0, 0, 0, 0.07) 78%, rgba(0, 0, 0, 0.2) 100%);
+}
+
+/* ---------------- 暗色 bento 面板 ---------------- */
+
+.intro__panel {
+  position: absolute;
+  /* 上边单独加大（第三十轮）：nav 底边原来压在面板上沿。is-intro 时 nav
+     收紧到 7vh，面板上沿再下移 ~30px，两者之间留出可见空隙；左右下保持
+     原彩虹边框宽度。 */
+  inset: calc(var(--intro-pad) + clamp(18px, 3.4vh, 34px)) var(--intro-pad) var(--intro-pad);
+  z-index: 4;
+  background: #08080b;
+  border-radius: var(--intro-r);
+  border: 1px solid rgba(242, 235, 220, 0.07);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  /* 入场落位：只跑一次，不是滚动联动的（滚动联动会让整块文字每帧重栅格化）。 */
+  transform: scale(0.972);
+  transition: transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.is-intro .intro__panel {
+  transform: scale(1);
+}
+
+.intro__grid {
+  display: grid;
+  grid-template-columns: 26fr 38fr 36fr;
+  gap: var(--intro-gap);
+  height: 100%;
+  /* 上边 4px（原 --intro-gap=10）：给面板上移让高度，卡片顶边与面板边框
+     的呼吸由左右下三边补回观感。 */
+  padding: 4px var(--intro-gap) var(--intro-gap);
+}
+
+.icol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--intro-gap);
+  min-width: 0;
+  min-height: 0;
+}
+
+.ibox {
+  position: relative;
+  background: var(--icard);
+  border: 1px solid var(--ihair);
+  border-radius: var(--ir-in);
+  overflow: hidden;
+}
+
+/* ============================================================
+   左栏
+   ============================================================ */
+
+.ibox--me {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* 底边 14（原 21）：面板上移后本卡变矮，底部内边距让出 6px 给内容 */
+  padding: clamp(13px, 1.25vw, 21px) clamp(13px, 1.25vw, 21px) clamp(10px, 0.95vw, 15px);
+  background:
+    radial-gradient(120% 60% at 50% 8%, rgba(201, 180, 242, 0.07), rgba(0, 0, 0, 0) 62%),
+    var(--icard);
+}
+
+.ibox__handle {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: clamp(9px, 0.72vw, 12px);
+  letter-spacing: 0.08em;
+  color: rgba(242, 235, 220, 0.4);
+}
+
+/* 展示名。参考里是 "Hello! / I'm Max" 两行巨字，行距压得很紧。
+   中文不能照抄拉丁的 0.9 —— 汉字字面比拉丁满，0.9 会上下粘连。
+   这里 1.06 配 gap 0.04em，既紧又不碰。 */
+.ime {
+  margin: 0.18em 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.04em;
+  font-family: "Anton", "Archivo", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-weight: 800;
+  font-size: clamp(28px, 4.35vw, 74px);
+  line-height: 1.06;
+  letter-spacing: 0.005em;
+  color: var(--cream);
+}
+
+/* 名称与正文之间的空气，兼作一束柔光 */
+.ime__air {
+  flex: 1 1 auto;
+  min-height: clamp(8px, 1.6vh, 30px);
+  position: relative;
+}
+
+.ime__air::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 82%;
+  height: 160%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(201, 180, 242, 0.1), rgba(0, 0, 0, 0) 72%);
+  filter: blur(18px);
+}
+
+.ibox__desc {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(10px, 0.77vw, 12.6px);
+  line-height: 1.75;
+  letter-spacing: 0.01em;
+  color: rgba(242, 235, 220, 0.56);
+}
+
+.ichips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(4px, 0.42vw, 7px);
+  margin: clamp(10px, 1.3vh, 17px) 0 0;
+  padding: 0;
+}
+
+.ichips li {
+  font-family: var(--font-ui);
+  font-size: clamp(8.6px, 0.68vw, 11.4px);
+  letter-spacing: 0.02em;
+  color: rgba(242, 235, 220, 0.64);
+  padding: clamp(4px, 0.55vh, 6px) clamp(8px, 0.7vw, 12px);
+  border: 1px solid var(--ihair);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.022);
+  white-space: nowrap;
+}
+
+/* ---- 所在地 ---- */
+
+/* ---- 地点卡（第二十八轮：底下的按钮排删掉了，这卡往下扩占满原位
+   （原 6.6vh ≈ 66px → 15.6vh ≈ 140px = 原 loc + 原 cta + 一个间隙），
+   上面介绍卡的 flex:1 会自动补回几乎不变的高度） ---- */
+
+.ibox--loc {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 0.9vw, 15px);
+  padding: clamp(9px, 0.85vw, 13px) clamp(11px, 1vw, 16px);
+  min-height: clamp(112px, 14.6vh, 168px);
+}
+
+.iloc__text { flex: 0 0 auto; }
+
+.iloc__city {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: clamp(11px, 0.88vw, 14.6px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--cream);
+}
+
+.iloc__time {
+  margin: 4px 0 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: clamp(8px, 0.63vw, 10.4px);
+  color: rgba(242, 235, 220, 0.4);
+  white-space: nowrap;
+}
+
+.iloc__clock {
+  color: rgba(242, 235, 220, 0.74);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 抽象"城市图"：点阵 + 三组不同角度的细线当路网，右侧一颗定位点。
+   左缘用 mask 淡出，和左侧文字自然接上。 */
+.iloc__map {
+  position: relative;
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background:
+    radial-gradient(62% 92% at 66% 50%, rgba(122, 169, 240, 0.15), rgba(0, 0, 0, 0) 72%),
+    repeating-linear-gradient(58deg, rgba(242, 235, 220, 0.075) 0 1px, rgba(0, 0, 0, 0) 1px 21px),
+    repeating-linear-gradient(-34deg, rgba(242, 235, 220, 0.055) 0 1px, rgba(0, 0, 0, 0) 1px 30px),
+    repeating-linear-gradient(11deg, rgba(242, 235, 220, 0.04) 0 1px, rgba(0, 0, 0, 0) 1px 46px),
+    #0e0e12;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #000 28%, #000 100%);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #000 28%, #000 100%);
+}
+
+.iloc__grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(242, 235, 220, 0.16) 1px, rgba(0, 0, 0, 0) 1px);
+  background-size: 9px 9px;
+  opacity: 0.55;
+}
+
+.iloc__pin {
+  position: absolute;
+  left: 66%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cream);
+  transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 0 3px rgba(242, 235, 220, 0.14),
+    0 0 14px 3px rgba(242, 235, 220, 0.3);
+}
+
+/* ============================================================
+   中栏：数字身份卡
+   ============================================================ */
+
+.ibox--pass {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #0d1015 0%, #0a0a0d 42%, #0a0a0d 100%);
+  /* 3D 透视。origin 偏上：观察点比卡片高一点，才像"挂在眼前看"
+     （perspective 放 50% 50% 的话正翻时会显得卡片在原地打转）。 */
+  perspective: 1500px;
+  perspective-origin: 50% 40%;
+}
+
+/* 上方垂下来的细线：参考里那张卡是"吊"着的。
+   横向 26px 一根竖线，再用径向 mask 把中间一簇留出来、往两边淡掉。 */
+.ipass__threads {
+  position: relative;
+  flex: 0 0 auto;
+  height: clamp(24px, 5vh, 54px);
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(242, 235, 220, 0.24) 0 1px,
+    rgba(0, 0, 0, 0) 1px 26px
+  );
+  -webkit-mask-image: radial-gradient(40% 100% at 50% 0%, #000 0%, rgba(0, 0, 0, 0.32) 58%, rgba(0, 0, 0, 0) 100%);
+  mask-image: radial-gradient(40% 100% at 50% 0%, #000 0%, rgba(0, 0, 0, 0.32) 58%, rgba(0, 0, 0, 0) 100%);
+}
+
+.ipass__threads::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 5px;
+  width: 13px;
+  height: 9px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(242, 235, 220, 0.5);
+  border-radius: 3px;
+}
+
+/* 卡片居中区。两侧的收边用 100%（=本栏宽度）与 46vh 取差 —— 这样
+   "卡片宽度 = min(栏宽, 46vh)"，任何视口下都不会被拉成长条或压扁，
+   而且不需要和 aspect-ratio 打架（aspect-ratio 遇到 definite height
+   + max-width 时不会回算高度，会直接变形）。 */
+.ipass__stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 46vh：--intro-pad 放宽之后面板变矮，卡片跟着变矮而宽度没变，
+     比例收在 0.614，和参考的 0.62 基本重合。 */
+  padding: 0 max(0px, calc((100% - 46vh) / 2));
+  /* 滚动视差的纵向位移挪到这一层，把 3D 倾转让给 .ipass__body */
+  transform: translate3d(0, calc(var(--intro-p) * -2.4vh), 0);
+  will-change: transform;
+}
+
+/* ============================================================
+   3D 工牌
+
+   参考视频里中间那张不是"一张图"，是一块**实体工牌**：
+   半透明塑料卡套 + 顶部挂槽，卡面是一张人像照片。
+   第二十四轮按用户要求改了交互：**不做滚动翻转**（原来的
+   rotateY(--intro-p*360deg) 拆掉了），改成指针跟随 —— 卡片朝指针
+   方向轻微平移 + 小角度倾斜，**照片那面永远朝前**（角度封顶远离
+   90°，背面永远翻不出来，只留在 DOM 里备用）。三层各管一件事：
+
+     .ibox--pass    perspective（透视原点偏上，像挂在眼前看）
+     .ipass__stage  滚动视差位移
+     .ipass__badge  钟摆晃动（纯 CSS 动画）
+     .ipass__body   指针跟随（--shift-x/y 平移 px + --tilt-x/y 倾斜 deg，scroll.js 写）
+     .ipass__face   正/背两张面，backface-visibility:hidden 互相藏
+   ============================================================ */
+
+/* 挂着晃的钟摆。幅度很小：工牌有重量，不是贴纸。 */
+.ipass__badge {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: ipassSway 7.5s ease-in-out infinite;
+}
+
+@keyframes ipassSway {
+  0%, 100% { transform: rotateZ(-1.25deg); }
+  50%      { transform: rotateZ(1.25deg); }
+}
+
+/* 跟随体。全部由指针驱动，角度封顶 ±9°/±7°：
+   先朝指针方向平移一点点（--shift-x/y，px），再小角度倾斜（--tilt-x/y，deg）。
+   角度离 90° 远得很，正面（照片面）永远朝前，翻不到背面。 */
+.ipass__body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform:
+    translate3d(calc(var(--shift-x, 0) * 1px), calc(var(--shift-y, 0) * 1px), 0)
+    rotateY(calc(var(--tilt-y, 0) * 1deg))
+    rotateX(calc(var(--tilt-x, 0) * 1deg));
+  will-change: transform;
+}
+
+/* 一张"面" = 塑料卡套 + 里面的卡面。卡套用 padding 留出边框，
+   顶部那条留得特别宽，放挂槽。 */
+.ipass__face {
+  position: absolute;
+  inset: 0;
+  border-radius: clamp(16px, 1.6vw, 26px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  padding:
+    clamp(26px, 4.4vh, 46px)
+    clamp(10px, 1vw, 16px)
+    clamp(10px, 1vw, 16px);
+  background: linear-gradient(
+    165deg,
+    rgba(56, 66, 76, 0.8) 0%,
+    rgba(28, 34, 42, 0.88) 46%,
+    rgba(14, 18, 24, 0.92) 100%
+  );
+  box-shadow:
+    0 30px 68px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+/* 挂槽：嵌在卡套顶边里的一道凹槽 */
+.ipass__slot {
+  position: absolute;
+  top: clamp(10px, 1.5vh, 16px);
+  left: 50%;
+  width: 36%;
+  height: clamp(6px, 0.9vh, 9px);
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(5, 7, 11, 0.78);
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 里面的卡面（照片那层） */
+.ipass__card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: calc(clamp(16px, 1.6vw, 26px) - 9px);
+  overflow: hidden;
+  background:
+    radial-gradient(120% 70% at 24% 0%, rgba(150, 196, 240, 0.42), rgba(0, 0, 0, 0) 58%),
+    radial-gradient(90% 60% at 86% 6%, rgba(120, 220, 205, 0.2), rgba(0, 0, 0, 0) 60%),
+    linear-gradient(178deg, #33475b 0%, #26394c 30%, #1b2c3d 56%, #131f2b 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* 真照片（assets/img/liu-yiran.jpg，1440×1920）。cover 裁切把焦点对在
+   人脸（原图约 56% / 30% 处），scale(1.06) 给微视差位移留余量；
+   上下各压一层暗渐变（ProfileCard 的 scrim 思路）保证字可读。
+   --pfx/--pfy（0..1，指针在卡内的位置，scroll.js 写）驱动反向微视差。 */
+.ipass__photo {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(6, 9, 14, 0.52) 0%, rgba(6, 9, 14, 0) 24%),
+    linear-gradient(0deg, rgba(6, 9, 14, 0.6) 0%, rgba(6, 9, 14, 0) 32%),
+    url("../img/liu-yiran.jpg") 56% 30% / cover no-repeat;
+  transform:
+    translate3d(calc((var(--pfx, 0.5) - 0.5) * 9px), calc((var(--pfy, 0.5) - 0.5) * 7px), 0)
+    scale(1.06);
+  will-change: transform;
+}
+
+/* 光标眩光层（ProfileCard 的 pc-glare）：一团暖白高光跟着指针走，
+   soft-light 混合只作用于照片（photo 自身有 transform，是独立堆叠上下文，
+   不会污染文字），进卡淡入 / 出卡淡出（--spot 0/1 由 scroll.js 写）。 */
+.ipass__photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    42% 30% at calc(var(--pfx, 0.5) * 100%) calc(var(--pfy, 0.5) * 100%),
+    rgba(255, 246, 226, 0.5),
+    rgba(255, 246, 226, 0) 100%
+  );
+  mix-blend-mode: soft-light;
+  opacity: var(--spot, 0);
+  transition: opacity 0.5s ease;
+}
+
+/* 品牌字：参考里 "aximoris" 横压在照片上部。加一点与指针反向的
+   微视差（照片朝指针去、字往回退 → 有纵深），阴影加重一点压住照片。 */
+.ipass__wordmark {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(calc(-50% + (0.5 - var(--pfx, 0.5)) * 7px));
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: clamp(13px, 1.85vw, 30px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  white-space: nowrap;
+  text-shadow: 0 2px 22px rgba(4, 7, 12, 0.55);
+}
+
+/* 信息条 = ProfileCard 的 .pc-user-info 玻璃条：毛玻璃 + 细白边，
+   同样带一点反向微视差（比照片动得少 → 分层深度）。 */
+.ipass__meta {
+  position: absolute;
+  left: clamp(8px, 0.9vw, 14px);
+  right: clamp(8px, 0.9vw, 14px);
+  bottom: clamp(9px, 1.3vh, 16px);
+  display: block;
+  text-align: center;
+  padding: clamp(7px, 1.1vh, 12px) clamp(8px, 0.9vw, 14px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: clamp(10px, 1vw, 15px);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow: 0 10px 26px rgba(4, 7, 12, 0.3);
+  transform: translate3d(calc((0.5 - var(--pfx, 0.5)) * 6px), calc((0.5 - var(--pfy, 0.5)) * 4px), 0);
+}
+
+.ipass__meta b {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: clamp(8.6px, 0.7vw, 11.6px);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ipass__meta i {
+  display: block;
+  margin-top: 3px;
+  font-style: normal;
+  font-family: var(--font-ui);
+  font-size: clamp(7.6px, 0.58vw, 9.6px);
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 全息小圆贴（右上角） */
+.ipass__sticker {
+  position: absolute;
+  right: clamp(9px, 1vw, 15px);
+  top: clamp(9px, 1.3vh, 16px);
+  width: clamp(15px, 1.4vw, 23px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 210deg,
+    #ff9ad5, #ffe08a, #9dffc7, #8ad4ff, #c9a6ff, #ff9ad5
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* 塑料面反光：一道斜向高光 */
+.ipass__gloss {
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(
+    112deg,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0.14) 48%,
+    rgba(255, 255, 255, 0) 58%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* ---------- 背面：珠光全息 ---------- */
+
+.ipass__face--back {
+  transform: rotateY(180deg);
+}
+
+.ipass__face--back .ipass__card {
+  background: linear-gradient(165deg, #f2f4f7 0%, #e2e8ee 38%, #eaeef2 66%, #f6f8fa 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(20, 28, 40, 0.08);
+}
+
+/* 参考背面（t=13）就是一张浅底上带着虹彩光斑的卡。
+   这几团彩色柔光用 normal 混合 + 重模糊 —— 在浅底上用 screen 会直接糊成白。 */
+.ipass__holo {
+  position: absolute;
+  inset: -12%;
+  background:
+    radial-gradient(34% 26% at 68% 58%, rgba(255, 110, 190, 0.5), rgba(0, 0, 0, 0) 70%),
+    radial-gradient(28% 22% at 34% 70%, rgba(110, 215, 255, 0.45), rgba(0, 0, 0, 0) 70%),
+    radial-gradient(26% 20% at 58% 84%, rgba(255, 215, 110, 0.4), rgba(0, 0, 0, 0) 70%),
+    radial-gradient(30% 24% at 88% 38%, rgba(150, 255, 200, 0.34), rgba(0, 0, 0, 0) 70%),
+    radial-gradient(24% 18% at 16% 32%, rgba(180, 150, 255, 0.32), rgba(0, 0, 0, 0) 70%);
+  filter: blur(16px);
+}
+
+.ipass__brand {
+  position: absolute;
+  left: 50%;
+  top: 11%;
+  transform: translateX(-50%);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: clamp(8.6px, 0.7vw, 11.6px);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(22, 30, 40, 0.38);
+  white-space: nowrap;
+}
+
+/* 背面的品牌小标：线框立方体（和首页那颗"不可能立方体"呼应），深色版 */
+.ipass__cube {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44%;
+  height: auto;
+  transform: translate(-50%, -52%);
+  color: rgba(24, 32, 42, 0.32);
+}
+
+.ipass__chip {
+  position: absolute;
+  left: 50%;
+  bottom: 13%;
+  width: 34%;
+  height: clamp(4px, 0.55vh, 6px);
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(20, 28, 38, 0.14);
+}
+
+.ipass__foot {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 clamp(12px, 1.1vw, 18px) clamp(9px, 1.1vh, 15px);
+}
+
+.ipass__label {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: clamp(10px, 0.79vw, 13px);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(242, 235, 220, 0.86);
+}
+
+.ipass__en {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8em;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(242, 235, 220, 0.34);
+}
+
+.ipass__arrow {
+  position: absolute;
+  right: clamp(12px, 1.1vw, 18px);
+  bottom: clamp(11px, 1.2vh, 17px);
+  width: clamp(15px, 1.15vw, 19px);
+  color: rgba(242, 235, 220, 0.42);
+}
+
+.ipass__arrow svg { display: block; width: 100%; height: auto; }
+
+/* ============================================================
+   右栏
+   ============================================================ */
+
+.ibox--social {
+  /* 固定占右栏 44%，剩下的都给作品列表 —— 两栏都 flex:1 的话图标卡会被
+     撑得空荡荡（六边形底纹是背景，不需要靠高度撑）。 */
+  flex: 0 0 44%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(10px, 1vw, 18px);
+}
+
+.ihive {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(0, calc(var(--intro-p) * -4vh), 0) scale(1.04);
+  will-change: transform;
+}
+
+.isocial {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 13%;   /* 中列上提之后下面要留出等量的空，否则被裁 */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(5px, 0.7vw, 13px);
+  /* 第一版放到 292px 宽、图标只有 22px，格距是图标 4 倍，整簇散掉了。
+     收到 13vw 之后格距约 2.9 倍，才像参考里那样"一簇"。 */
+  width: min(100%, clamp(170px, 15.5vw, 262px));
+}
+
+.isocial li {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+/* 中列整体上提 → 3 列变蜂窝 */
+.isocial li:nth-child(3n + 2) {
+  transform: translateY(-42%);
+}
+
+.isocial a {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: rgba(242, 235, 220, 0.6);
+  transition: color 0.3s ease, background 0.3s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.isocial svg {
+  width: clamp(16px, 1.65vw, 27px);
+  height: auto;
+  display: block;
+}
+
+.isocial a:hover {
+  color: var(--cream);
+  background: rgba(242, 235, 220, 0.06);
+  transform: scale(1.07);
+}
+
+.isocial a::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 3px);
+  transform: translate(-50%, 4px);
+  font-family: var(--font-ui);
+  font-size: clamp(8px, 0.6vw, 10px);
+  letter-spacing: 0.06em;
+  color: var(--cream);
+  background: rgba(12, 12, 16, 0.94);
+  border: 1px solid var(--ihair-2);
+  border-radius: 999px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.isocial a:hover::after,
+.isocial a:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---- 作品总览预览卡（haoqi.design 项目窗效果，第二十七轮） ----
+   整块面板：平时显示预览图（暂为占位画布，用户后续换真图），
+   悬停整块淡入米白纯色 + 黑星标 + 「作品总览」。
+   换图只改 .iwks__img 的 background。层序：img z1 → solid z2 → 十字 z3 → 文字/星标 z4。 */
+
+.ibox--works {
+  flex: 1 1 auto;
+  min-height: 0;
+  --imono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  --icream: #f2ebdc;  /* 悬停纯色换成本站奶油色（第二十八轮，替代 haoqi 的灰米 #d8d4ce） */
+  --iink: #17181c;    /* 奶油底上的近黑 */
+}
+
+/* 十字准星两层同 tile：奶油色给暗态、近黑给米白态，悬停互换。
+   + 画在 150px tile 左上角，四张拼角补成完整十字。 */
+.ibox--works::before,
+.ibox--works::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cpath d='M0 0h13M0 0v13' stroke='rgba(242,235,220,0.15)' stroke-width='1'/%3E%3C/svg%3E");
+  transition: opacity 0.45s ease;
+}
+
+.ibox--works::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cpath d='M0 0h13M0 0v13' stroke='rgba(23,24,28,0.22)' stroke-width='1'/%3E%3C/svg%3E");
+  opacity: 0;
+}
+
+.ibox--works:hover::before { opacity: 0; }
+.ibox--works:hover::after { opacity: 1; }
+
+/* 正常态：预览图。现在是占位（深蓝点阵画布 + 淡窗口线框），
+   换真图把 background 换成 url("../img/works-overview.jpg") center / cover no-repeat。 */
+.iwks__img {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(rgba(99, 118, 216, 0.32) 1px, transparent 1.4px) 0 0 / 14px 14px,
+    linear-gradient(178deg, #14152b 0%, #101123 55%, #0d0e1e 100%);
+  transition: opacity 0.45s ease;
+}
+
+/* 占位用的窗口线框（换真图后可整段删掉） */
+.iwks__img::after {
+  content: "";
+  position: absolute;
+  left: 13%;
+  right: 13%;
+  top: 15%;
+  bottom: 19%;
+  border: 1px solid rgba(216, 212, 206, 0.2);
+  border-radius: 6px;
+  background: linear-gradient(rgba(216, 212, 206, 0.09) 0 0) 0 0 / 100% 22px no-repeat;
+}
+
+/* 悬停态：整块米白纯色 */
+.iwks__solid {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--icream);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.ibox--works:hover .iwks__solid { opacity: 1; }
+.ibox--works:hover .iwks__img { opacity: 0; }
+
+/* 居中标题「作品总览」：从下方 10px 浮起，落在画布正中（第二十八轮：
+   星标删掉，标题从左下角挪到中间放大） */
+.iwks__ttl {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  opacity: 0;
+  transform: translate(-50%, -50%) translateY(10px);
+  transition: opacity 0.4s ease 0.08s, transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) 0.08s;
+  pointer-events: none;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: clamp(24px, 2.6vw, 44px);
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  color: var(--iink);
+}
+
+.ibox--works:hover .iwks__ttl {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+/* 右下等宽小字（参考的底栏文案位） */
+.iwks__meta {
+  position: absolute;
+  right: clamp(12px, 1.2vw, 20px);
+  bottom: clamp(13px, 1.6vh, 21px);
+  z-index: 4;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s ease 0.08s, transform 0.4s ease 0.08s;
+  pointer-events: none;
+  font-family: var(--imono);
+  font-size: clamp(7.6px, 0.58vw, 9.6px);
+  letter-spacing: 0.16em;
+  color: rgba(23, 24, 28, 0.55);
+}
+
+.ibox--works:hover .iwks__meta {
+  opacity: 1;
+  transform: none;
+}
+
+/* ============================================================
+   顶栏在彩虹底上的可读性
+   ============================================================ */
+
+/* 面板边距只有 20~30px，而顶栏高 64~96px —— 顶栏有一半压在彩虹上，
+   奶油色的 logo 会读不出来。加一道从顶部往下的暗色罩，只在这一屏出现。
+
+   z-index:-1：.nav 是 position:fixed + z-index，本身就是一个层叠上下文，
+   所以 -1 只会在 .nav 内部垫底，不会漏到 .stage / .intro 下面去。
+   这样也不需要给 .pill-nav 额外加 position —— 非定位元素会被绝对定位的
+   伪元素盖住，那才是坑。 */
+.nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* 0.58 是够用的下限：再往上加，彩虹框顶边就会被压成近黑，整个"浮在
+     渐变上"的观感没了（第一版 0.82 实测四角量到 rgb(14,16,27)）。
+     导航内容实际落在 y≈24~57，那里罩子只剩 ~0.25，奶油字依然读得出来。 */
+  background: linear-gradient(180deg, rgba(6, 6, 10, 0.58) 0%, rgba(6, 6, 10, 0.24) 50%, rgba(6, 6, 10, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.is-intro .nav::before {
+  opacity: 1;
+}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+
+@media (max-width: 1240px) {
+  /* 中间那张卡在窄栏下会变成细长条，给它留点上下留白把比例拉回来 */
+  .ipass__stage {
+    padding: clamp(14px, 5.5vh, 56px) max(0px, calc((100% - 46vh) / 2));
+  }
+
+  .ihive { opacity: 0.75; }
+}
+
+@media (max-height: 760px) and (min-width: 901px) {
+  .ime { font-size: clamp(26px, 3.6vw, 54px); }
+  .ibox__desc { line-height: 1.6; }
+  .ichips { margin-top: 8px; }
+  .ichips li { padding: 3px 8px; }
+  .ipass__threads { height: 26px; }
+}
+
+/* 单栏模式：窄屏不在 100vh 里硬塞三栏。取消 sticky 钉住、取消所有
+   滚动联动位移，退化成一条正常的长页面。 */
+@media (max-width: 900px) {
+  .intro {
+    height: auto;
+    margin-top: 100vh;
+  }
+
+  .intro__pin {
+    position: static;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    padding: var(--intro-pad);
+  }
+
+  .intro__panel {
+    position: relative;
+    inset: auto;
+    transform: none;
+    transition: none;
+  }
+
+  .intro__grid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .intro__bg,
+  .intro__blobs,
+  .intro__stars,
+  .ihive,
+  .ipass__stage {
+    transform: none;
+    will-change: auto;
+  }
+
+  .ibox--me { flex: 0 0 auto; min-height: 44vh; }
+  .ibox--pass { min-height: 64vh; }
+  /* 单栏下身份卡会变成横的（实测 460×440，比例 1.045）—— 桌面那句
+     "padding: 0 max(0px, (100% - 46vh)/2)" 是按"三栏里栏宽 < 卡高"算的，
+     单栏里栏宽远大于卡高，收不住。这里直接用 aspect-ratio 定成竖卡：
+     height 是 definite（100%），width:auto 由比例推出来，不需要和
+     definite height 打架（桌面那句不能用 aspect-ratio 的原因正是
+     那里的 width 被 max-width 夹住了）。 */
+  .ipass__badge {
+    width: auto;
+    height: 100%;
+    aspect-ratio: 0.66;
+    max-width: 100%;
+  }
+  .ipass__face {
+    padding:
+      clamp(24px, 4.2vh, 44px)
+      clamp(10px, 1vw, 16px)
+      clamp(10px, 1vw, 16px);
+  }
+  /* 桌面那句 flex:0 0 44% 是按"三栏里占右栏 44% 高"算的，单栏下没有意义，
+     必须放回来让高度由内容决定。 */
+  .ibox--social { flex: 0 0 auto; min-height: 40vh; }
+  .isocial { width: min(100%, 240px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro__bg,
+  .intro__blobs,
+  .intro__stars,
+  .ihive,
+  .ipass__stage {
+    transform: none;
+    will-change: auto;
+  }
+
+  .intro__blob { animation: none; }
+
+  /* 工牌：钟摆停住、指针跟随停用（停在正面）；scroll.js 在 reduce 下也不写变量 */
+  .ipass__badge { animation: none; }
+  .ipass__body { transform: none; will-change: auto; }
+
+  .intro__panel,
+  .is-intro .intro__panel { transform: none; transition: none; }
+}

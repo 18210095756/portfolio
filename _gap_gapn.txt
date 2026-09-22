@@ -1,0 +1,14 @@
+tag=gapn viewport=760x1000
+--- home (scrollY=0) ---
+nav      t=0 b=64 h=64
+navRow   left t=13.5 l=20 | center t=21.5 l=344 | right t=13.5 l=660 => ⚠ NOT one row
+--- intro (scrollY=1000 isIntro=true) ---
+htmlClass=is-intro navComputedH=70px
+nav      t=0 b=70 h=70
+panel    t=27.4 l=27.4 r=732.6 b=1696.4 w=705.3 h=1669
+GAP nav.bottom->panel.top = -42.6px
+me       t=32.4 b=472.4 w=689.3 h=440
+loc      t=479.4 b=625.4 w=689.3 h=146
+me content=461.4/472.4 ok (fits)
+shots=_in_gapn.png + _in_home_gapn.png
+logs=none
