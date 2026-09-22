@@ -41,33 +41,91 @@
            这里原来的 WORK / CREATORS / COLLECTION / EVENTS 文字链接已移除 ——
            它与胶囊导航同为站点导航，并排放在左上角会重复且拥挤。
            .nav-left / .nav-link 的样式仍留在 CSS 里，要恢复只需把这几个 <a> 加回来。 -->
+    <!-- 左侧虚线圆环装饰 -->
+    <div class="deco-ring" aria-hidden="true" data-page-node-id="hyBuyvo1y9oXEjrDK3i0Yo">
+        <a class="pill-nav__logo" href="#" aria-label="Liu Yiran · 首页" data-page-node-id="HU6a9i5F240LDqSCv14igD">
+          <svg viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="jrKzeln0oqcmFC2h1IXnNr">
+            <path d="M12 1.8l1.9 6.7 6.4 2.2-6.4 2.2L12 19.6l-1.9-6.7L3.7 10.7l6.4-2.2z" data-page-node-id="cfwP8DN3hFnwDFXa8LeKx8" />
+          </svg>
+        </a>
+        <ul class="pill-nav__list" data-page-node-id="2CyTglfp5EHGxmRNw4Objp">
+          <li data-page-node-id="XUxzrZfDPqAmf8Mj6akZay">
+            <a class="pill-nav__item is-active" href="#" data-page-node-id="dnS3YywBeEWOJIzCkslyvA">
+              <span class="pill-nav__circle" aria-hidden="true" data-page-node-id="lEIlZ8Q6up65WLWuPgPrGz"></span>
+              <span class="pill-nav__stack" data-page-node-id="tSiF4uaeoHZh9EspUTdygo">
+                <span class="pill-nav__label" data-page-node-id="HeBXRCoVspsyeoyPDcrzow">首页</span>
+                <span class="pill-nav__label-hover" aria-hidden="true" data-page-node-id="tsDBNAJSaBsoD6RJFjxtS2">首页</span>
+              </span>
+            </a>
+          </li>
+          <li data-page-node-id="dm4FNH63b5u27S2sxvXWBh">
+            <a class="pill-nav__item" href="#" data-page-node-id="4uElksnXhcnywvJJqaB734">
+              <span class="pill-nav__circle" aria-hidden="true" data-page-node-id="zKbjLD4DxQg2YW5gF1mDho"></span>
+              <span class="pill-nav__stack" data-page-node-id="4y3nfi0BWzwlD2q3xBufvI">
+                <span class="pill-nav__label" data-page-node-id="lhfihRUfhBrUVCo85xJn9m">关于我</span>
+                <span class="pill-nav__label-hover" aria-hidden="true" data-page-node-id="gTMrKbWJKGjpZfdwzJdo3E">关于我</span>
+              </span>
+            </a>
+          </li>
+          <li data-page-node-id="FS1pFzHzPUEtsO1u5aagK1">
+            <a class="pill-nav__item" href="#" data-page-node-id="dyPV7Nnedx72uxNBP0FjTP">
+              <span class="pill-nav__circle" aria-hidden="true" data-page-node-id="PKaTHau3CpYenYvDXCaZXH"></span>
+              <span class="pill-nav__stack" data-page-node-id="Pm74xGahIxgurQFBtgC4Yv">
+                <span class="pill-nav__label" data-page-node-id="nBrbYLRa0RHpM7Ctuezyn7">作品</span>
+                <span class="pill-nav__label-hover" aria-hidden="true" data-page-node-id="fybLcz1yV7qKtIFzKKrPAA">作品</span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <a href="#" class="brand" data-page-node-id="IuKkkI6WFC14iARsciIwGD">
+        <span class="brand-line" data-page-node-id="iKmZvQua9sP588wpXFxJPz">Liu Yiran</span>
+        <span class="brand-line brand-line--sub" data-page-node-id="3D1AZHBpf2iCeYQa5KAAKH">Portfolio</span>
+      </a>
+
+      <div class="nav-right" data-page-node-id="deJO8rCtx7QPYVyZMNgyiU">
+        <!-- 液金主按钮（效果参考 vechooool.com/projects/living-green 的 "Explore the work"）。
+             三层，顺序即层序，不要调换：
+               __plate  暗玻璃胶囊，纯 CSS —— 也是没有 WebGL2 时的兜底外观
+               __fx     WebGL2 画布，比按钮四周各外扩 --lb-glow，给辉光留位置
+               __body   标签，在流内 —— 按钮的宽度/内边距由它和 .btn-pill 的 padding 决定
+             画布绝对定位且 pointer-events:none，所以按钮在导航里占的仍是一颗胶囊。 -->
+        <button class="btn-pill btn-pill--cn btn-liquid" id="liquidBtn" type="button" data-page-node-id="lVVqaEdFjRYjonoKGBNKvj">
+          <span class="btn-liquid__plate" aria-hidden="true"></span>
+          <canvas class="btn-liquid__fx" aria-hidden="true"></canvas>
+          <span class="btn-liquid__body">
+            <span data-page-node-id="HRkuTCQnNAm94pKb6Qu8IA">联系我</span>
+            <i class="dot" aria-hidden="true" data-page-node-id="WzkX1JWcbzm4isogxIiBo7"></i>
+          </span>
+        </button>
+      </div>
+    </header>
 
     <!-- 左侧虚线圆环装饰 -->
     <div class="deco-ring" aria-hidden="true" data-page-node-id="hyBuyvo1y9oXEjrDK3i0Yo">
       <span class="deco-ring__arc" data-page-node-id="eidFgrq1fGUUzsLxyi2G8t"></span>
     </div>
 
-    <!-- 左下：数据卡已按要求移除（.stat-card 的样式仍留在 style.css 里，
-         要恢复只需把下面这段加回来）：
-    <aside class="stat-card">
-      <div class="stat-card__head">
-        <span class="stat-card__num">48</span>
-        <span class="stat-card__label">Creative<br />Projects</span>
+    <!-- 左下：数据卡 -->
+    <aside class="stat-card" data-page-node-id="EJRDmMWgAPJByjd8zCwDsg">
+      <div class="stat-card__head" data-page-node-id="O2BZGdOk3YqmlCBIvQl232">
+        <span class="stat-card__num" data-page-node-id="ecelTIgxZJRxt5ftt2KkKa">48</span>
+        <span class="stat-card__label" data-page-node-id="EdQLeIHwWNa1MAA7PdnLAm">Creative<br  data-page-node-id="B4SqKTTCbZwmTS39H9s2Oi"/>Projects</span>
       </div>
-      <div class="stat-card__foot">
-        <div class="avatar-row">
-          <span class="avatar avatar--1"></span>
-          <span class="avatar avatar--2"></span>
-          <span class="avatar avatar--3"></span>
+      <div class="stat-card__foot" data-page-node-id="I483e3V7tsfQsDnDOUi1Fa">
+        <div class="avatar-row" data-page-node-id="qIg6JUI0fkd0XYcE2GmOnw">
+          <span class="avatar avatar--1" data-page-node-id="9eVsCXnKchFPttU37UOxH5"></span>
+          <span class="avatar avatar--2" data-page-node-id="NTrnMTNjjD9o9QHrCZj44S"></span>
+          <span class="avatar avatar--3" data-page-node-id="CiCqCFiFlo55qWetCtsK7p"></span>
         </div>
-        <button class="avatar-btn" type="button" aria-label="展开作品集">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 2.6l2.5 6.2 6.7.4-5.2 4.2 1.7 6.5L12 16.4l-5.7 3.5 1.7-6.5L2.8 9.2l6.7-.4z" />
+        <button class="avatar-btn" type="button" aria-label="展开作品集" data-page-node-id="PaPf8mQiDtPfpVfxMVbeC9">
+          <svg viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="p5eV8vL4mCWQiwnBVUIQXm">
+            <path d="M12 2.6l2.5 6.2 6.7.4-5.2 4.2 1.7 6.5L12 16.4l-5.7 3.5 1.7-6.5L2.8 9.2l6.7-.4z" data-page-node-id="aEfoQQo2uE4PShvRV2Os23" />
           </svg>
         </button>
       </div>
     </aside>
-    -->
 
     <!-- 底部中间：行动按钮 -->
     <div class="cta-row" data-page-node-id="4RQMRZXbhBk90gGGBUFpHY">
@@ -94,9 +152,10 @@
         </svg>
       </div>
       <div class="about-block__body" data-page-node-id="PZ7EXDQNzcS1vNRA8Sa9aH">
-        <h2 class="about-block__title" data-page-node-id="ZUyq7ugIiRPbNIvGeAvdy9">刘怡然工作作品展示</h2>
+        <h2 class="about-block__title" data-page-node-id="ZUyq7ugIiRPbNIvGeAvdy9">Selected Works<br  data-page-node-id="StRBfySm3t0PocFdvRdaXD"/>Showcase</h2>
         <p class="about-block__text" data-page-node-id="6jdKueBJAqoBkJGlqzwkIb">
-          聚焦线下展厅空间下的大屏交互 UI 设计，以空间叙事重塑屏幕界面体验，兼顾硬件限制、现场访客行为与企业叙事，完成数字界面从创意到展厅现场落地。
+          在这座数字策展空间里，创作者以视觉、动效与交互为媒介，把想法塑造成可触摸的作品。
+          这里收录了 Liu Yiran 近期的概念设计与实验性项目，欢迎进入展厅，一起探索。
         </p>
       </div>
     </section>
@@ -110,74 +169,6 @@
 
   <div class="vignette" aria-hidden="true" data-page-node-id="kGG3ACotplVCBADYtpZWPd"></div>
   <div class="grain" aria-hidden="true" data-page-node-id="wVDQGOYt3M6XMsoZDzBRqq"></div>
-
-  <!-- ============ 导航 ============ -->
-  <!-- 刻意放在 .vignette / .grain 之后（即最上层），而不是留在 .ui-layer 里。
-       .vignette(z4) / .grain(z5) 压在 .ui-layer(z3) 之上，会把导航整行乘到约
-       43% —— 实测 var(--cream)=#f2ebdc 只渲染出 104，而画面中央的大标题是 255。
-       液金按钮最亮处因此被硬顶在天花板上，着色器输出再大也只是一团灰。
-       UI 外壳不该被胶片处理压住；画面（场景 + 大标题）不动。
-       位置靠 .nav 上的 z-index:6 保底，不依赖 DOM 顺序。 -->
-  <header class="nav" data-page-node-id="GxEBvRjBFTy8PEtOYVns4n">
-    <nav class="pill-nav" id="pillNav" aria-label="主导航" data-page-node-id="0guAGSWMcHjboJTeTPBEVl">
-      <a class="pill-nav__logo" href="#" aria-label="Liu Yiran · 首页" data-page-node-id="HU6a9i5F240LDqSCv14igD">
-        <svg viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="jrKzeln0oqcmFC2h1IXnNr">
-          <path d="M12 1.8l1.9 6.7 6.4 2.2-6.4 2.2L12 19.6l-1.9-6.7L3.7 10.7l6.4-2.2z" data-page-node-id="cfwP8DN3hFnwDFXa8LeKx8" />
-        </svg>
-      </a>
-      <ul class="pill-nav__list" data-page-node-id="2CyTglfp5EHGxmRNw4Objp">
-        <li data-page-node-id="XUxzrZfDPqAmf8Mj6akZay">
-          <a class="pill-nav__item is-active" href="#" data-page-node-id="dnS3YywBeEWOJIzCkslyvA">
-            <span class="pill-nav__circle" aria-hidden="true" data-page-node-id="lEIlZ8Q6up65WLWuPgPrGz"></span>
-            <span class="pill-nav__stack" data-page-node-id="tSiF4uaeoHZh9EspUTdygo">
-              <span class="pill-nav__label" data-page-node-id="HeBXRCoVspsyeoyPDcrzow">首页</span>
-              <span class="pill-nav__label-hover" aria-hidden="true" data-page-node-id="tsDBNAJSaBsoD6RJFjxtS2">首页</span>
-            </span>
-          </a>
-        </li>
-        <li data-page-node-id="dm4FNH63b5u27S2sxvXWBh">
-          <a class="pill-nav__item" href="#" data-page-node-id="4uElksnXhcnywvJJqaB734">
-            <span class="pill-nav__circle" aria-hidden="true" data-page-node-id="zKbjLD4DxQg2YW5gF1mDho"></span>
-            <span class="pill-nav__stack" data-page-node-id="4y3nfi0BWzwlD2q3xBufvI">
-              <span class="pill-nav__label" data-page-node-id="lhfihRUfhBrUVCo85xJn9m">关于我</span>
-              <span class="pill-nav__label-hover" aria-hidden="true" data-page-node-id="gTMrKbWJKGjpZfdwzJdo3E">关于我</span>
-            </span>
-          </a>
-        </li>
-        <li data-page-node-id="FS1pFzHzPUEtsO1u5aagK1">
-          <a class="pill-nav__item" href="#" data-page-node-id="dyPV7Nnedx72uxNBP0FjTP">
-            <span class="pill-nav__circle" aria-hidden="true" data-page-node-id="PKaTHau3CpYenYvDXCaZXH"></span>
-            <span class="pill-nav__stack" data-page-node-id="Pm74xGahIxgurQFBtgC4Yv">
-              <span class="pill-nav__label" data-page-node-id="nBrbYLRa0RHpM7Ctuezyn7">作品</span>
-              <span class="pill-nav__label-hover" aria-hidden="true" data-page-node-id="fybLcz1yV7qKtIFzKKrPAA">作品</span>
-            </span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-
-    <a href="#" class="brand" data-page-node-id="IuKkkI6WFC14iARsciIwGD">
-      <span class="brand-line" data-page-node-id="iKmZvQua9sP588wpXFxJPz">Liu Yiran</span>
-      <span class="brand-line brand-line--sub" data-page-node-id="3D1AZHBpf2iCeYQa5KAAKH">Portfolio</span>
-    </a>
-
-    <div class="nav-right" data-page-node-id="deJO8rCtx7QPYVyZMNgyiU">
-      <!-- 液金主按钮（效果参考 vechooool.com/projects/living-green 的 "Explore the work"）。
-           三层，顺序即层序，不要调换：
-             __plate  暗玻璃胶囊，纯 CSS —— 也是没有 WebGL2 时的兜底外观
-             __fx     WebGL2 画布，比按钮四周各外扩 --lb-glow，给辉光留位置
-             __body   标签，在流内 —— 按钮的宽度/内边距由它和 .btn-pill 的 padding 决定
-           画布绝对定位且 pointer-events:none，所以按钮在导航里占的仍是一颗胶囊。 -->
-      <button class="btn-pill btn-pill--cn btn-liquid" id="liquidBtn" type="button" data-page-node-id="lVVqaEdFjRYjonoKGBNKvj">
-        <span class="btn-liquid__plate" aria-hidden="true"></span>
-        <canvas class="btn-liquid__fx" aria-hidden="true"></canvas>
-        <span class="btn-liquid__body">
-          <span data-page-node-id="HRkuTCQnNAm94pKb6Qu8IA">联系我</span>
-          <i class="dot" aria-hidden="true" data-page-node-id="WzkX1JWcbzm4isogxIiBo7"></i>
-        </span>
-      </button>
-    </div>
-  </header>
 </div>
 
 <script src="vendor/three.min.js"></script>

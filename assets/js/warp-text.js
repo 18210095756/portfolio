@@ -161,9 +161,10 @@
   var LINE2 = 'EXHIBITION \u00B7 LIU YIRAN';
 
   /* Mirrors the CSS layout of .hero-title so the swap is invisible:
-     font-size clamp(38px, 11.4vw, 315px), line-height 0.84, gap 0.015em,
+     font-size clamp(38px, 11.4vw, 315px), line-height 0.91, gap 0.03em,
      letter-spacing -0.014em, the second line at 0.955em, block shifted
-     up by 1.5vh. */
+     up by 1.5vh.  这三个数与 style.css 的 .hero-title 必须一起改 ——
+     0.84 行高时 Anton 的大写字面会完全贴死，两行之间留不出缝。 */
   function rasterize() {
     var W = Math.max(1, stage.clientWidth);
     var H = Math.max(1, stage.clientHeight);
@@ -176,9 +177,9 @@
 
     var fs1 = Math.min(Math.max(38, 0.114 * W), 315);
     var fs2 = fs1 * 0.955;
-    var lh1 = 0.84 * fs1;
-    var lh2 = 0.84 * fs2;
-    var gap = 0.015 * fs1;
+    var lh1 = 0.91 * fs1;
+    var lh2 = 0.91 * fs2;
+    var gap = 0.03 * fs1;
     var total = lh1 + gap + lh2;
     var cy = H / 2 - 0.015 * H;
     var y1 = cy - total / 2 + lh1 / 2;

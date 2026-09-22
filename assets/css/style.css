@@ -108,11 +108,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.015em;
+  /* 两行之间的空隙。Anton 的字面几乎顶满 em 框，0.84 行高时两行的大写字母是
+     完全贴死的（实测 1600px 视口下行剖面里找不到任何暗谷）。0.91 + 0.03em 的
+     flex gap 才留出约 15px 的一线缝。改这里必须同步改 warp-text.js 的
+     rasterize()：lh1/lh2/gap 三个数，否则 WebGL 接管后间距会跳一下。 */
+  gap: 0.03em;
   font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(38px, 11.4vw, 315px);
-  line-height: 0.84;
+  line-height: 0.91;
   letter-spacing: -0.014em;
   text-transform: uppercase;
   color: var(--cream);
@@ -198,12 +202,28 @@ body {
   top: 0;
   left: 0;
   right: 0;
+  /* 导航是 .stage 的直接子元素，刻意排在 .vignette(z4) / .grain(z5) 之后 ——
+     那两层胶片处理压在 .ui-layer(z3) 上，会把整行乘到约 43%（实测
+     var(--cream)=#f2ebdc 只渲染出 104，而画面中央的大标题是 255）。右上角的
+     液金按钮最亮处因此在 110 左右就被硬顶住，着色器再亮也只是一团灰。
+     UI 外壳归 UI，胶片处理归画面。z-index 写死在这里，不依赖 DOM 顺序。 */
+  z-index: 6;
   height: clamp(64px, 9vh, 96px);
   padding: 0 var(--pad-x);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  /* 搬出 .ui-layer 后必须自己关掉命中测试：.nav 是整幅宽 × 约 81px 的一条，
+     一旦默认可命中，顶部这条带上就再也点不到/拖不到下面的立方体、粒子与
+     变形大标题（原来是从 .ui-layer 继承的 pointer-events:none 挡掉的）。
+     只把真正可交互的子元素放回来。 */
+  pointer-events: none;
+}
+
+.nav a,
+.nav button {
+  pointer-events: auto;
 }
 
 .nav-left {
@@ -279,6 +299,165 @@ body {
 .nav-right {
   display: flex;
   align-items: center;
+  gap: clamp(10px, 1vw, 16px);
+  /* ≤860px 时 .nav-left 被隐藏，.nav-right 就成了唯一的流内子元素，
+     space-between 会把它推到最左边 —— 而导航栏要留在右上角。
+     margin-left:auto 在这里兜底；宽屏下与 space-between 结果一致。 */
+  margin-left: auto;
+}
+
+/* ---------------- Pill navigation (reactbits PillNav) ----------------
+   悬停时一颗圆从条目底边中心扩张成整颗胶囊，把条目"融进"外壳的奶油色；
+   同时原 label 上移出框、深色 label 从下方升入。
+   圆的直径与 transform-origin 由 pillnav.js 按每颗的实际宽高算出来写成
+   行内样式（见该文件顶部推导），这里只管外观与过渡。
+
+   配色刻意沿用页面既有的语言：
+   --pn-reveal 与 .btn-pill--solid / .stat-card 同一支奶油色，
+   所以"悬停 = 条目变成实心"与右上角 CONTACT 是同一套视觉语法。
+   变量一律加 pn- 前缀，避免和 :root 上的 --pad-x 等通用名撞车。 */
+
+.pill-nav {
+  --pn-h: clamp(32px, 3.7vh, 42px);        /* 与 .btn-pill 同高 → 右上角三者齐平 */
+  --pn-pad-x: clamp(11px, 1.05vw, 18px);
+  --pn-gap: 3px;
+  --pn-reveal: rgba(242, 235, 220, 0.94);
+  --pn-reveal-text: #0a0a0f;
+  --pn-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --pn-dur: 0.3s;
+
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 0.55vw, 10px);
+}
+
+.pill-nav__logo {
+  flex: 0 0 auto;
+  width: var(--pn-h);
+  height: var(--pn-h);
+  border-radius: 50%;
+  background: var(--pn-reveal);
+  color: var(--pn-reveal-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.9);
+}
+
+.pill-nav__logo svg {
+  width: 46%;
+  height: 46%;
+  display: block;
+  fill: currentColor;
+  will-change: transform;
+}
+
+.pill-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 3px;
+  height: var(--pn-h);
+  display: flex;
+  align-items: stretch;
+  gap: var(--pn-gap);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  box-sizing: border-box;
+}
+
+.pill-nav__list > li { display: flex; }
+
+.pill-nav__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 var(--pn-pad-x);
+  border-radius: 999px;
+  overflow: hidden;                        /* 圆扩张时被条目裁切，只铺满条目这一块 */
+  text-decoration: none;
+  color: var(--cream-dim);
+  font-family: var(--font-ui);
+  font-size: clamp(9px, 0.62vw, 11.5px);   /* 中文字面比拉丁字大，比 .btn-pill 略小才配 */
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  transition: color var(--pn-dur) var(--pn-ease);
+}
+
+/* 参照实现的 is-active 是写在 overflow:hidden 的条目里、又被 bottom:-6px 推到
+   框外的小圆点 —— 实际永远看不见。这里改成"当前项淡底 + 亮字"，层级是
+   暗字 → 亮字（当前） → 实心奶油（悬停），一眼能读出来。 */
+.pill-nav__item.is-active {
+  color: var(--cream);
+  background: rgba(242, 235, 220, 0.1);
+}
+
+.pill-nav__circle {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  z-index: 1;
+  display: block;
+  border-radius: 50%;
+  background: var(--pn-reveal);
+  transform: translateX(-50%) scale(0);
+  transition: transform var(--pn-dur) var(--pn-ease);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.pill-nav__stack {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  z-index: 2;
+}
+
+.pill-nav__label {
+  display: inline-block;
+  line-height: 1;
+  transition: transform var(--pn-dur) var(--pn-ease);
+  will-change: transform;
+}
+
+.pill-nav__label-hover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-block;
+  line-height: 1;
+  color: var(--pn-reveal-text);
+  opacity: 0;
+  transform: translateY(calc(var(--pn-pill-h, 28px) + 100px));
+  transition: transform var(--pn-dur) var(--pn-ease), opacity var(--pn-dur) var(--pn-ease);
+  will-change: transform, opacity;
+}
+
+.pill-nav__item.is-open .pill-nav__circle { transform: translateX(-50%) scale(1.2); }
+.pill-nav__item.is-open .pill-nav__label { transform: translateY(calc(-1 * var(--pn-pill-h, 28px) - 8px)); }
+.pill-nav__item.is-open .pill-nav__label-hover { transform: translateY(0); opacity: 1; }
+
+/* 导航栏移到左上角之后，窄屏也轮不到它让位了（原来占宽度的 4 个英文文字链接已移除），
+   圆标不再需要隐藏，只收紧一点横向内边距。 */
+@media (max-width: 860px) {
+  .pill-nav { --pn-pad-x: 11px; }
+}
+
+@media (max-width: 640px) {
+  .pill-nav { --pn-pad-x: 9px; --pn-gap: 2px; }
+  .pill-nav__item { font-size: 9.5px; letter-spacing: 0.06em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill-nav__circle,
+  .pill-nav__label,
+  .pill-nav__label-hover { transition-duration: 0.001s; }
 }
 
 /* ---------------- Buttons ---------------- */
@@ -319,12 +498,164 @@ body {
   background: #fff;
 }
 
+/* 中文主按钮（"联系我"）。
+   3 个汉字比 "CONTACT" 短得多，若沿用同一套字号字距，按钮会缩成一小块、
+   在只剩它一个的右上角显得单薄。所以字号略提、字距收窄（汉字字面本就比
+   拉丁字大，.16em 的通用字距用在汉字上会散）、横向内边距加大 ——
+   保住它作为全页唯一 CTA 的分量。 */
+.btn-pill--cn {
+  font-size: clamp(10px, 0.7vw, 12.5px);
+  letter-spacing: 0.1em;
+  padding: 0 clamp(16px, 1.6vw, 26px);
+}
+
 .btn-pill .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #0a0a0f;
   opacity: 0.6;
+}
+
+/* -------- 液金主按钮「联系我」（效果参考 vechooool living-green） --------
+
+   结构（三层，顺序即层序，见 index.html）：
+     __plate  暗玻璃胶囊，纯 CSS —— 也是 WebGL2 缺失时的兜底外观
+     __fx     画布，比按钮四周各外扩 --lb-glow，给辉光留地方
+     __body   标签，在流内，按钮的宽度/内边距由它和 .btn-pill 的 padding 决定
+
+   三个要点：
+   1. __fx 绝对定位 + 负偏移 → 不参与布局，所以按钮在导航里占的仍是一颗胶囊，
+      辉光可以溢出到胶囊之外（祖先必须不裁切，见下面的 overflow）。
+   2. 不允许位移：画布按按钮的 getBoundingClientRect 对齐，一旦按钮在 hover 时
+      上移 1px（.btn-pill:hover 的 translateY），金属就会和胶囊错开。故锁死。
+   3. 状态类由 liquid-btn.js 打在按钮上（is-hot / is-press），不是 :hover ——
+      键盘焦点、触摸按压要能复用同一套表现。
+
+   配色刻意落回页面自己的语言：胶囊是同族的暗玻璃（与 .pill-nav__list 一致），
+   金属走奶油 → 丁香紫的色散，而不是把参考站的白铬搬过来。 */
+.btn-liquid {
+  /* 画布比按钮四周各外扩这么多。两个约束：
+     1. 辉光必须有地方衰减到 0 —— 模糊链是 CLAMP_TO_EDGE，边缘还剩能量就会在
+        画布矩形上留一条硬边（近黑底上非常明显）。合成 pass 里另有一扇 16% 的
+        淡出窗口兜底，两边一起保证不出缝。
+     2. 右上角离视口右缘只有 --pad-x（约 42px），外面留不下太多，所以上限压在 44px。 */
+  --lb-glow: clamp(22px, 3vh, 44px);
+
+  position: relative;
+  isolation: isolate;
+  background: none;
+  border-color: transparent;
+  backdrop-filter: none;
+  overflow: visible;
+  transform: none;
+}
+
+/* 中和 .btn-pill:hover / .btn-pill--solid:hover 的底色与位移 */
+.btn-liquid:hover,
+.btn-liquid:focus-visible {
+  background: none;
+  border-color: transparent;
+  transform: none;
+  outline: none;
+}
+
+.btn-liquid:focus-visible .btn-liquid__plate {
+  box-shadow:
+    0 0 0 2px rgba(242, 235, 220, 0.55),
+    0 6px 16px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.btn-liquid__plate {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(242, 235, 220, 0.17);
+  /* 顶面一层薄高光 → 玻璃唇；底色偏冷偏深，好把金属的暖端衬出来 */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.014) 44%, rgba(255, 255, 255, 0) 64%),
+    rgba(11, 11, 17, 0.62);
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.40),
+    0 12px 30px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: box-shadow 0.38s cubic-bezier(0.22, 0.61, 0.36, 1),
+              background 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* 悬停：玻璃更暗也更厚，让内部的金属更亮 —— 底暗了，光才有地方亮 */
+.btn-liquid.is-hot .btn-liquid__plate {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.02) 44%, rgba(255, 255, 255, 0) 64%),
+    rgba(9, 9, 15, 0.50);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.46),
+    0 16px 40px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+/* 按下：投影收紧、玻璃压平，是"按进去"而不是"浮起来" */
+.btn-liquid.is-press .btn-liquid__plate {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.01) 44%, rgba(255, 255, 255, 0) 64%),
+    rgba(8, 8, 13, 0.56);
+  box-shadow:
+    0 3px 9px rgba(0, 0, 0, 0.48),
+    0 8px 20px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  transition-duration: 0.10s;
+}
+
+.btn-liquid__fx {
+  position: absolute;
+  left: calc(-1 * var(--lb-glow));
+  top: calc(-1 * var(--lb-glow));
+  width: calc(100% + 2 * var(--lb-glow));
+  height: calc(100% + 2 * var(--lb-glow));
+  z-index: 1;
+  display: block;
+  pointer-events: none;
+}
+
+.btn-liquid__body {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cream);
+  /* 金属会在标签下面烧亮，纯靠着色器的遮罩不够稳，加一层贴身投影兜住可读性 */
+  text-shadow:
+    0 1px 8px rgba(0, 0, 0, 0.80),
+    0 0 3px rgba(0, 0, 0, 0.65);
+}
+
+.btn-liquid .dot {
+  width: 5px;
+  height: 5px;
+  background: var(--cream);
+  opacity: 0.85;
+  box-shadow: 0 0 7px rgba(242, 235, 220, 0.55);
+  transition: background 0.4s ease, box-shadow 0.4s ease, opacity 0.35s ease;
+}
+
+/* 悬停/按下时金属会从下往上烧到纯白，奶油色的小点就糊进白底里了 ——
+   此时翻成深色，等于把老版"奶油实心按钮上的深色小点"搬到了金属上，
+   两种状态下都读得出来。 */
+.btn-liquid.is-hot .dot,
+.btn-liquid.is-press .dot {
+  background: rgba(10, 10, 15, 0.62);
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(10, 10, 15, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 动着色器不做时间推进（liquid-btn.js 里也已冻结 clock），
+     这里只把 CSS 侧的状态过渡也收掉 */
+  .btn-liquid__plate,
+  .btn-liquid .dot { transition-duration: 0.001s; }
 }
 
 /* ---------------- Left dashed ring decoration ---------------- */
@@ -495,11 +826,20 @@ body {
 .about-block {
   position: absolute;
   right: var(--pad-x);
-  bottom: var(--pad-y);
+  /* 往上抬一点：原来与 .cta-row 共用同一条 --pad-y 底线，贴着视口下沿偏挤。
+     加的这个值是相对 pad-y 的增量，窄屏/矮屏都不会把文案顶到 3D 内容里。 */
+  bottom: calc(var(--pad-y) + clamp(16px, 2.9vh, 40px));
   width: clamp(250px, 23vw, 380px);
   display: flex;
   align-items: flex-start;
   gap: clamp(10px, 1vw, 16px);
+}
+
+/* __body 必须是撑满剩余宽度的那一项。原来它是"按内容收缩"，于是文本列的右缘
+   比整块（也就是比右上角那颗按钮的右缘）短了约 46px —— 看起来就像没对齐。 */
+.about-block__body {
+  flex: 1;
+  min-width: 0;
 }
 
 .about-block__mark svg {
@@ -515,22 +855,34 @@ body {
   50%      { transform: scale(1.14) rotate(12deg); opacity: 1; }
 }
 
+/* 标题现在是中文：**汉字的行段规则与拉丁文不同** ——
+   - line-height 1.08 是给全大写拉丁倒标题用的，用在汉字上会挤死，改成 1.35；
+   - letter-spacing 0.08em 是给 uppercase 拉丁用的（汉字字面本就比拉丁字宽，
+     同样的字距会散），收到 0.04em。
+   text-transform 留着：对 CJK 是空操作，将来换回英文标题仍然成立。 */
 .about-block__title {
   margin: 0 0 8px;
   font-family: var(--font-ui);
-  font-size: clamp(13px, 1.12vw, 19px);
+  /* 标题要明显大过正文才有层级。原来 clamp(13px, 1.12vw, 19px)（1600 下 17.9px）
+     只有正文 11.2px 的 1.6 倍，读起来像"加粗的正文"。1.42vw / 上限 24px 把它提到
+     正文的 2 倍左右；下限也从 13px 提到 15px，窄屏不至于又缩回正文尺寸。 */
+  font-size: clamp(15px, 1.42vw, 24px);
   font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: 0.08em;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .about-block__text {
   margin: 0;
   font-size: clamp(9.5px, 0.7vw, 12px);
-  line-height: 1.7;
+  /* 中文正文比拉丁需要更宽的leading，否则竖笔画会连成一片 */
+  line-height: 1.85;
+  letter-spacing: 0.02em;
   color: var(--cream-dim);
-  max-width: 42ch;
+  /* 原来是 max-width: 42ch —— 那是按拉丁字符宽度算的，会把中文段落截短，
+     右缘够不到右上角按钮。要让**文段右缘**与按钮右缘重合，这里必须去掉。 */
+  max-width: none;
 }
 
 /* ---------------- Scroll / drag hint ---------------- */

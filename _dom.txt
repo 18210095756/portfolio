@@ -1,5 +1,11 @@
-mode=fps
-shot=C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\_fps_base.png bytes=1648502
-fps=2.4
-probe=warped=true canvas=true gl=true size=300x150 litPx=0 headChannelSpread=0 || no-tdbg
+pillGeom=nav=41.6,23.8 234.7x33.3 list=192.6 || CTA box=1452.3,23.8 106.2x33.3 right=1558.4 font=11.2px bg=rgba(242, 235, 220, 0.94) txt="联系我" | [首页
+                首页] box=87.7,27.8 55.8x25.3 circle=59px/59px bottom=-27px origin=50% 32px | [关于我
+                关于我] box=146.5,27.8 66.9x25.3 circle=72px/72px bottom=-27px origin=50% 45px | [作品
+                作品] box=216.5,27.8 55.8x25.3 circle=59px/59px bottom=-27px origin=50% 32px
+mode=pill
+shot=C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\_nav2.png bytes=1535028
+hover=C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\_nav2_hover.png bytes=1661297
+hover2=C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\_nav2_hover2.png bytes=1568804
+logoHover=C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\_nav2_logo.png bytes=1724337
+probe=warped=true canvas=true gl=true size=1600x900 litPx=54 headChannelSpread=67 || dust live=40/620 t=1.83 ptr=live
 logs=none
