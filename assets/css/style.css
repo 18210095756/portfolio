@@ -25,6 +25,13 @@
 
   --pad-x: clamp(20px, 2.6vw, 52px);
   --pad-y: clamp(18px, 2.2vh, 34px);
+
+  /* 底部两个角共用的一条底线：左下胶囊与右下文案块的 bottom 都锚在这里，
+     所以它们永远下方对齐。取值是"比 --pad-y 再抬一点"——
+     原来胶囊紧贴 --pad-y（离视口下沿太挤），文案块却比它高 26px，
+     两个角一高一低；现在让它们各自让一半、在同一条线上收齐。
+     改这一处两个角同时动，不要分别改。 */
+  --foot-y: calc(var(--pad-y) + clamp(10px, 1.5vh, 22px));
 }
 
 * { box-sizing: border-box; }
@@ -767,16 +774,29 @@ body {
   fill: currentColor;
 }
 
-/* ---------------- Bottom-center CTA row ---------------- */
+/* ---------------- 底部胶囊（左下角） ---------------- */
 
+/* 左缘对齐 --pad-x，与左上角的胶囊导航、右上角的「联系我」按钮同一条边距线；
+   底缘仍用 --pad-y。原来居中（left:50% + translateX(-50%)）时它和右下角的
+   介绍文案块各占一角，视觉上是一对"压在画面下沿的题注"；挪到左下角之后与
+   左上角的导航形成对角呼应，右下角留给介绍文案。 */
 .cta-row {
   position: absolute;
-  left: 50%;
-  bottom: var(--pad-y);
-  transform: translateX(-50%);
+  left: var(--pad-x);
+  bottom: var(--foot-y);   /* 与右下角文案块共用一条底线，见 :root 的 --foot-y */
   display: flex;
   align-items: center;
   gap: clamp(8px, 0.8vw, 14px);
+  /* 从 .ui-layer 搬出后与 .nav 同级、z-index:6，否则 .vignette(z4)/.grain(z5)
+     会把 SpecularButton 高光乘到只剩 ~40%，深底上几乎看不出。 */
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* 容器自己关掉命中：30px 一条带子、放在画面最下沿，本来也不会挡到什么交互；
+   只让真正可点击的胶囊放回来。 */
+.cta-row a {
+  pointer-events: auto;
 }
 
 .btn-ghost {
@@ -797,7 +817,8 @@ body {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: background 0.35s ease, border-color 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: background 0.35s ease, border-color 0.35s ease, color 0.3s ease,
+              transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .btn-ghost:hover {
@@ -821,14 +842,85 @@ body {
   transform: rotate(45deg) translate(-1px, -1px);
 }
 
+/* 中文变体。.btn-ghost 原本是给全大写拉丁调的：0.15em 的字距用在汉字上会散成一颗一颗，
+   字号也可以略提一点（汉字字面比拉丁字大，同样的 px 更"小"）。
+
+   字色是"静默 / 悬浮点亮"两级：
+     · 默认 .30 —— 胶囊已经搬出暗角层（z6），不再被 .vignette 乘 0.4，
+       用满奶油会太抢眼（实测峰值 222）；但也不能直接抄站点其它次级文字的
+       --cream-dim(.62)，那支是在暗角层之下渲染的，屏幕上只剩约 25%。
+       这里取 .30 让"屏幕上"的观感与页面其它次级文字持平（峰值约 70）。
+     · hover / focus 才提到满奶油 —— 光弧是"靠近就亮"（proximity 250px），
+       字色是"压上去才亮"，两级反馈刚好错开。
+   星形图标跟着一起淡，否则字淡下去之后那颗丁香紫会独占视线。 */
+.btn-ghost--cn {
+  font-size: clamp(9px, 0.72vw, 12px);
+  letter-spacing: 0.06em;
+  color: rgba(242, 235, 220, 0.3);
+}
+
+.btn-ghost--cn:hover,
+.btn-ghost--cn:focus-visible {
+  color: var(--cream);
+}
+
+.btn-ghost--cn .spark {
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+}
+
+.btn-ghost--cn:hover .spark,
+.btn-ghost--cn:focus-visible .spark {
+  opacity: 1;
+}
+
+/* -------- 镜面高光胶囊（效果参考 reactbits SpecularButton） --------
+
+   SpecularButton 是"一圈会跟着光走的边走高光"：一道贴着圆角矩形边缘的高斯亮线，
+   只在与光源方向夹角落在 shineSize ± shineFade 的弧段上亮起 —— 于是正对光的那半边边
+   和背对光的那半边边同时亮，两段亮弧之间是暗的，读起来就是"光从某个方向打过来"。
+   光源方向追光标（光标在胶囊上时锁到对角线），亮度随光标距离做 smoothstep 渐入。
+
+   两个要点：
+   1. __fx 画布比胶囊四周各外扩 20px（PAD，与 specular-btn.js 一致）。画布**整体**
+      盖在胶囊上，但着色器只在 |d| ≲ 3px 的贴边区域输出颜色，内部全透明 ——
+      所以胶囊本身仍由 CSS 画（底、边框、文字都在下面那层）。
+   2. 画布不允许吃指针事件，否则会挡住 <a> 的点击与 hover。 */
+.btn-specular {
+  position: relative;
+  isolation: isolate;
+}
+
+.btn-specular__fx {
+  position: absolute;
+  display: block;
+  z-index: 1;
+  pointer-events: none;
+  /* left/top/width/height 由 JS 按胶囊实际 rect 写成 px（不用 inset+100%：
+     绝对定位的替换元素在 width:auto 时会退回固有尺寸，百分比又要按 padding box
+     算，都会和着色器里的 uCenter/uHalfSize 差一两个像素）。 */
+}
+
+/* 内容抬到画布之上 */
+.btn-specular > *:not(.btn-specular__fx) {
+  position: relative;
+  z-index: 2;
+}
+
+/* 按下时整体缩一下 —— 参考组件自带的手感反馈（原版是 scale(.97)） */
+.btn-specular:active {
+  transform: scale(0.97);
+}
+
 /* ---------------- Bottom-right about block ---------------- */
 
 .about-block {
   position: absolute;
   right: var(--pad-x);
-  /* 往上抬一点：原来与 .cta-row 共用同一条 --pad-y 底线，贴着视口下沿偏挤。
-     加的这个值是相对 pad-y 的增量，窄屏/矮屏都不会把文案顶到 3D 内容里。 */
-  bottom: calc(var(--pad-y) + clamp(16px, 2.9vh, 40px));
+  /* 与左下角胶囊共用 --foot-y：原来它比胶囊高 26px（增量 clamp(16px,2.9vh,40px)），
+     两个角一高一低；现在往下放、与胶囊下方对齐（胶囊同时往上抬了一点）。
+     改这一处两个角同时动，不要分别改。 */
+  bottom: var(--foot-y);
   width: clamp(250px, 23vw, 380px);
   display: flex;
   align-items: flex-start;
@@ -874,7 +966,12 @@ body {
 }
 
 .about-block__text {
-  margin: 0;
+  /* 末行底下的行距留白要收掉：文字块的"盒底"比它**字的实际底缘**低约 0.62em
+     （line-height 1.85 的下半行距 + 字体下伸部），而左下角胶囊是实心描边、
+     盒底就是视觉底。两者共用 --foot-y 时，文案块会显得"没到底"、比胶囊高一截。
+     负 margin 让块的盒底继续压在 --foot-y 上、字却真正落到底线，
+     于是**眼睛看到的**两个下方才是齐的。用 em 而非 px，换字号时自动跟着走。 */
+  margin: 0 0 -0.62em;
   font-size: clamp(9.5px, 0.7vw, 12px);
   /* 中文正文比拉丁需要更宽的leading，否则竖笔画会连成一片 */
   line-height: 1.85;
