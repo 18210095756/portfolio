@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>cube sweep</title>
+<style>
+  html,body{margin:0;height:100%;background:#131118;overflow:hidden;
+            font:600 14px/1.2 monospace;color:#7CFF9B}
+  #c{position:absolute;inset:0;z-index:0}
+  .grid{position:absolute;inset:0;z-index:1;display:grid;
+        grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+        pointer-events:none}
+  .grid div{padding:5px 0 0 7px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="grid" id="labels"></div>
+<script src="vendor/three.min.js"></script>
+<script>
+(function(){
+  if (THREE.ColorManagement) THREE.ColorManagement.legacyMode = false;
+
+  var CW = 1500, CH = 1500, COLS = 3, ROWS = 3;
+  var cellW = CW/COLS, cellH = CH/ROWS;
+
+  var renderer = new THREE.WebGLRenderer({canvas:document.getElementById('c'), antialias:true, alpha:true});
+  renderer.setSize(CW, CH, false);
+  renderer.setPixelRatio(1);
+  renderer.setClearColor(0x000000, 0);
+  renderer.setScissorTest(true);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.NoToneMapping;
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(24, cellW/cellH, 0.1, 100);
+
+  scene.add(new THREE.HemisphereLight(0xfaf5ff, 0x1b1826, 0.62));
+  scene.add(new THREE.AmbientLight(0xcdbdf0, 0.20));
+  var k = new THREE.DirectionalLight(0xfff4e8, 0.70); k.position.set(-2.8,7.4,5.6); scene.add(k);
+  var f = new THREE.DirectionalLight(0xffffff, 0.34); f.position.set(0.6,2.0,7.5); scene.add(f);
+
+  function roundedRect(w,h,r){
+    r = Math.min(r, Math.min(w,h)/2 - 0.001);
+    var s = new THREE.Shape();
+    s.moveTo(-w/2+r,-h/2);
+    s.lineTo(w/2-r,-h/2);  s.quadraticCurveTo(w/2,-h/2,w/2,-h/2+r);
+    s.lineTo(w/2,h/2-r);   s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);
+    s.lineTo(-w/2+r,h/2);  s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);
+    s.lineTo(-w/2,-h/2+r); s.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);
+    return s;
+  }
+
+  var MAT = new THREE.MeshPhysicalMaterial({
+    color:0xbca1ef, roughness:0.70, metalness:0.0, clearcoat:0.26,
+    clearcoatRoughness:0.52, sheen:0.72, sheenRoughness:0.62,
+    specularIntensity:0.42, envMapIntensity:0.72,
+    emissive:new THREE.Color(0xbca1ef).multiplyScalar(0.10)
+  });
+
+  function beamGeo(len,w,t,r){
+    var g = new THREE.ExtrudeGeometry(roundedRect(w,t,r), {
+      depth:len, bevelEnabled:true, bevelThickness:t*0.10,
+      bevelSize:Math.min(t*0.10, w*0.14), bevelSegments:4, curveSegments:14
+    });
+    g.translate(0,0,-len/2); g.computeVertexNormals(); return g;
+  }
+
+  function makeCube(a, b, squash, cfg){
+    var SIZE = 2.0;
+    var BW = SIZE*cfg.bw, BT = SIZE*cfg.bw;
+    var R  = BW*cfg.rr;
+    var OV = BT*cfg.ov;
+    var half = SIZE/2, len = SIZE + OV*2;
+    var gx = beamGeo(len,BW,BT,R), gy = beamGeo(len,BW,BT,R), gz = beamGeo(len,BW,BT,R);
+    var grp = new THREE.Group();
+    [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(p){
+      var m;
+      m = new THREE.Mesh(gx, MAT); m.rotation.y = -Math.PI/2; m.position.set(0, p[0]*half, p[1]*half); grp.add(m);
+      m = new THREE.Mesh(gz, MAT);                             m.position.set(p[0]*half, p[1]*half, 0); grp.add(m);
+      m = new THREE.Mesh(gy, MAT); m.rotation.x = Math.PI/2;  m.position.set(p[0]*half, 0, p[1]*half); grp.add(m);
+    });
+    grp.scale.set(1, squash, 1);
+    grp.rotation.set(a*Math.PI/180, b*Math.PI/180, 0);
+    return grp;
+  }
+
+  var JOBS = [
+    {a:18.6, b:45, sq:1.00, t:'a18.6 sq1.00'},
+    {a:24,   b:45, sq:0.90, t:'a24 sq0.90'},
+    {a:30,   b:45, sq:0.80, t:'a30 sq0.80'},
+    {a:35.3, b:45, sq:0.70, t:'a35.3 sq0.70'},
+    {a:30,   b:45, sq:0.88, t:'a30 sq0.88'},
+    {a:35.3, b:45, sq:0.82, t:'a35.3 sq0.82'},
+    {a:26,   b:38, sq:0.88, t:'a26 b38 sq0.88'},
+    {a:30,   b:52, sq:0.86, t:'a30 b52 sq0.86'},
+    {a:33,   b:45, sq:0.80, t:'a33 sq0.80'}
+  ];
+  var CFG = {bw:0.118, rr:0.20, ov:0.35};
+
+  var labels = document.getElementById('labels');
+  JOBS.forEach(function(j){
+    var d = document.createElement('div');
+    d.textContent = j.t + '  bw' + CFG.bw + ' rr' + CFG.rr;
+    labels.appendChild(d);
+  });
+
+  var DIST = 13.0;
+  camera.position.set(0,0,DIST);
+
+  JOBS.forEach(function(j, i){
+    var r = Math.floor(i/COLS), c = i%COLS;
+    var cube = makeCube(j.a, j.b, j.sq, CFG);
+    scene.add(cube);
+    camera.lookAt(0,0,0);
+    renderer.setViewport(c*cellW, CH - (r+1)*cellH, cellW, cellH);
+    renderer.setScissor (c*cellW, CH - (r+1)*cellH, cellW, cellH);
+    renderer.render(scene, camera);
+    scene.remove(cube);
+  });
+  document.title = 'ready';
+})();
+</script>
+</body>
+</html>

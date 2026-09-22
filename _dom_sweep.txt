@@ -1,0 +1,4 @@
+mode=sweep
+shot=C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\portfolio\_sweep.png bytes=1557039
+probe=warped=true canvas=true gl=true size=1600x900 litPx=3210 headChannelSpread=85 || frames=60 run=true has=true started=true hist=34 sparks=6 head=1340,240 ptr=1340,240 W=1600 H=900 dpr=1
+logs=none

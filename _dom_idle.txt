@@ -1,0 +1,4 @@
+mode=idle
+shot=C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\portfolio\_idle.png bytes=1494582
+probe=warped=true canvas=true gl=true size=1600x900 litPx=474 headChannelSpread=0 || frames=15 run=true has=true started=true hist=1 sparks=0 head=1180,300 ptr=1180,300 W=1600 H=900 dpr=1
+logs=none

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LIU YIRAN — Work Portfolio Exhibition</title>
+<meta name="description" content="Liu Yiran 个人作品集 · 3D 创意视觉与交互设计展览" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+  <!-- 背景大标题（位于 3D 场景之后） -->
+  <div class="hero-title-layer">
+    <h1 class="hero-title" aria-label="Work Portfolio Exhibition · Liu Yiran">
+      <span class="line">Work Portfolio</span>
+      <span class="line line--wide">Exhibition <span class="dot-sep">·</span> Liu Yiran</span>
+    </h1>
+    <!-- WebGL 玻璃扭曲标题：接管上面 <h1> 的视觉，<h1> 作为无 WebGL 时的降级 -->
+    <canvas id="warp" class="warp-canvas" aria-hidden="true"></canvas>
+    <div class="hero-glow" aria-hidden="true"></div>
+  </div>
+
+  <!-- 3D 场景画布（透明背景，浮于标题之上、UI 之下） -->
+  <canvas id="scene" class="scene-canvas" aria-hidden="true"></canvas>
+
+  <!-- 鼠标拖尾（浮于 3D 之上） -->
+  <canvas id="trail" class="trail-canvas" aria-hidden="true"></canvas>
+
+  <!-- 全局朦胧光晕（位于 3D 之上、UI 之下） -->
+  <div class="haze" aria-hidden="true"></div>
+
+  <!-- ============ UI 层 ============ -->
+  <div class="ui-layer">
+
+    <header class="nav">
+      <nav class="nav-left">
+        <a href="#" class="nav-link is-active"><span>Work</span></a>
+        <a href="#" class="nav-link"><span>Creators</span></a>
+        <a href="#" class="nav-link"><span>Collection</span></a>
+        <a href="#" class="nav-link"><span>Events</span></a>
+      </nav>
+
+      <a href="#" class="brand">
+        <span class="brand-line">Liu Yiran</span>
+        <span class="brand-line brand-line--sub">Portfolio</span>
+      </a>
+
+      <div class="nav-right">
+        <button class="btn-pill btn-pill--solid" type="button">
+          <span>Contact</span>
+          <i class="dot" aria-hidden="true"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- 左侧虚线圆环装饰 -->
+    <div class="deco-ring" aria-hidden="true">
+      <span class="deco-ring__arc"></span>
+    </div>
+
+    <!-- 左下：数据卡 -->
+    <aside class="stat-card">
+      <div class="stat-card__head">
+        <span class="stat-card__num">48</span>
+        <span class="stat-card__label">Creative<br />Projects</span>
+      </div>
+      <div class="stat-card__foot">
+        <div class="avatar-row">
+          <span class="avatar avatar--1"></span>
+          <span class="avatar avatar--2"></span>
+          <span class="avatar avatar--3"></span>
+        </div>
+        <button class="avatar-btn" type="button" aria-label="展开作品集">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2.6l2.5 6.2 6.7.4-5.2 4.2 1.7 6.5L12 16.4l-5.7 3.5 1.7-6.5L2.8 9.2l6.7-.4z" />
+          </svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- 底部中间：行动按钮 -->
+    <div class="cta-row">
+      <a href="#" class="btn-ghost">
+        <span>Commission Services</span>
+        <svg class="spark" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 1.8l1.9 6.7 6.4 2.2-6.4 2.2L12 19.6l-1.9-6.7L3.7 10.7l6.4-2.2z" />
+        </svg>
+      </a>
+      <a href="#" class="btn-ghost">
+        <span>Artistic Events</span>
+        <svg class="spark" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 1.8l1.9 6.7 6.4 2.2-6.4 2.2L12 19.6l-1.9-6.7L3.7 10.7l6.4-2.2z" />
+        </svg>
+        <span class="chev" aria-hidden="true"></span>
+      </a>
+    </div>
+
+    <!-- 右下：介绍文案 -->
+    <section class="about-block">
+      <div class="about-block__mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 1.8l1.9 6.7 6.4 2.2-6.4 2.2L12 19.6l-1.9-6.7L3.7 10.7l6.4-2.2z" />
+        </svg>
+      </div>
+      <div class="about-block__body">
+        <h2 class="about-block__title">Selected Works<br />Showcase</h2>
+        <p class="about-block__text">
+          在这座数字策展空间里，创作者以视觉、动效与交互为媒介，把想法塑造成可触摸的作品。
+          这里收录了 Liu Yiran 近期的概念设计与实验性项目，欢迎进入展厅，一起探索。
+        </p>
+      </div>
+    </section>
+
+    <div class="scroll-hint" aria-hidden="true">
+      <span class="scroll-hint__line"></span>
+      <span class="scroll-hint__txt">Drag to rotate</span>
+    </div>
+
+  </div>
+
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+</div>
+
+<script src="vendor/three.min.js"></script>
+<script src="assets/js/scene.js"></script>
+<script src="assets/js/warp-text.js"></script>
+<script src="assets/js/trail.js"></script>
+</body>
+</html>
