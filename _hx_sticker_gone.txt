@@ -1,0 +1,7 @@
+tag=sticker_gone viewport=1600x900 links=6 hoverAt=1301,329
+BEFORE fill=rgba(242, 235, 220, 0) stroke=rgba(242, 235, 220, 0.1) tagO=0
+AFTER  fill=rgba(242, 235, 220, 0.1) stroke=rgba(242, 235, 220, 0.48) tagO=1
+icoT before=matrix(1, 0, 0, 1, 0, 0)
+icoT after =matrix(1.5096, 0, 0, 1.5096, 0, -0.657703)
+VERDICT fill: hex lit OK | stroke: OK | tag: visible OK | ico: transformed OK
+logs=none

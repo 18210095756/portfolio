@@ -1,0 +1,11 @@
+tag=gpt3 viewport=1600x900 GPT at 1357,251 ico=26x26
+BEFORE fill=rgba(242, 235, 220, 0) stroke=rgba(242, 235, 220, 0.1) tagO=0
+AFTER  fill=rgba(242, 235, 220, 0.1) stroke=rgba(242, 235, 220, 0.48) tagO=1
+icoT before=matrix(1, 0, 0, 1, 0, 0)
+icoT after =matrix(1.5786, 0, 0, 1.5786, 0, -0.746756)
+hexRect=[1319,208,76,87]
+VERDICT fill: hex lit OK | tag: visible OK | ico: transformed OK
+logs=none
+svg=<svg class="ihx__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linejoin="round" aria-hidden="true">
+                    <!-- 第三十九轮：GPT 换成 streamline-logos:openai-logo 单线版（中心六边结+六弧），与参考图一致；
+                         第四十轮：该路

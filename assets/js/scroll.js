@@ -8,7 +8,6 @@
      .intro__bg          calc(var(--intro-p) * -5vh)   scale(1 → 1.06)
      .intro__blobs       calc(var(--intro-p) * -9vh)
      .intro__stars       calc(var(--intro-p) * -14vh)
-     .ihive              calc(var(--intro-p) * -4vh)
      .ipass__badge       calc(var(--intro-p) * -2.4vh)
 
    ⚠️ 写 CSS 变量而不是直接写元素样式：一圈 transform 都挂在同一个变量上，

@@ -1,0 +1,4 @@
+tag=dkn viewport=760x1000 parkAt=325,506
+mags = 1.60, 1.22, 1.23, 1.23, 1.00, 1.00, 1.00
+VERDICT: max=1.60 (expect ~1.55-1.6 at center) | min=1.00 (expect ~1.0 far) | GRADIENT OK
+logs=none

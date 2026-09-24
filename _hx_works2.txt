@@ -1,0 +1,6 @@
+tag=works2 vp=1600x900 rect=[1006,429,506,393]
+bg=url("file:///C:/Users/admin/WorkBuddy/2026-09-21-17-41-08/portfolio/as pos=50% 50% size=cover
+REST img=1 solid=0 ttl=0
+HOVER img=0.216771 solid=0.783229 ttl=0.590299
+VERDICT bg=⚠ not works-overview | hover-solid=NOT | hover-img=NOT | hover-ttl=NOT
+logs=none

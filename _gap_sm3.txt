@@ -1,0 +1,14 @@
+tag=sm3 viewport=1600x900
+--- home (scrollY=0) ---
+nav      t=0 b=81 h=81
+navRow   left t=23.8 l=41.6 | center t=27.3 l=756.9 | right t=23.8 l=1455.3 => ⚠ NOT one row
+--- intro (scrollY=900 isIntro=true) ---
+htmlClass=is-intro navComputedH=80.6562px
+nav      t=0 b=80.7 h=80.7
+panel    t=98 l=76.9 r=1523.1 b=832.6 w=1446.2 h=734.6
+GAP nav.bottom->panel.top = 17.3px
+me       t=102.9 b=684.4 w=365.5 h=581.5
+loc      t=694 b=822 w=365.5 h=128
+me content=668.8/684.4 ok (fits)
+shots=_in_sm3.png + _in_home_sm3.png
+logs=none

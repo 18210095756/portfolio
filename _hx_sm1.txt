@@ -1,0 +1,7 @@
+tag=sm1 viewport=1600x900 links=6 hoverAt=1314,325
+BEFORE fill=rgba(242, 235, 220, 0) stroke=rgba(242, 235, 220, 0.1) tagO=0
+AFTER  fill=rgba(242, 235, 220, 0) stroke=rgba(242, 235, 220, 0.1) tagO=0
+icoT before=none
+icoT after =none
+VERDICT fill: ⚠ hex NOT lit | stroke: ⚠ unchanged | tag: NOT visible | ico: NOT transformed
+logs=none

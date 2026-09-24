@@ -1,0 +1,4 @@
+tag=fixreduce viewport=1600x900 parkAt=1229,177
+mags = 1.60, 1.31, 1.31, 1.31, 1.09, 1.09, 1.01
+VERDICT: max=1.60 (expect ~1.55-1.6 at center) | min=1.01 (expect ~1.0 far) | GRADIENT OK
+logs=none

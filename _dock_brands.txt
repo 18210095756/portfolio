@@ -1,0 +1,4 @@
+tag=brands viewport=1600x900 parkAt=1229,177
+mags = 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00
+VERDICT: max=1.00 (expect ~1.55-1.6 at center) | min=1.00 (expect ~1.0 far) | ⚠ gradient missing
+logs=none

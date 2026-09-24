@@ -1,0 +1,7 @@
+tag=hovn viewport=760x1000 links=6 hoverAt=444,515
+BEFORE fill=rgba(242, 235, 220, 0) stroke=rgba(242, 235, 220, 0.1) tagO=0
+AFTER  fill=rgba(242, 235, 220, 0.1) stroke=rgba(242, 235, 220, 0.48) tagO=1
+icoT before=none
+icoT after =matrix(1.26, 0, 0, 1.26, 0, -3.08875)
+VERDICT fill: hex lit OK | stroke: OK | tag: visible OK | ico: transformed OK
+logs=none

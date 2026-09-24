@@ -1,0 +1,10 @@
+tag=gpt1280 viewport=1280x800 GPT at 1083,226 ico=23x23
+BEFORE fill=rgba(242, 235, 220, 0) stroke=rgba(242, 235, 220, 0.1) tagO=0
+AFTER  fill=rgba(242, 235, 220, 0.1) stroke=rgba(242, 235, 220, 0.48) tagO=1
+icoT before=matrix(1, 0, 0, 1, 0, 0)
+icoT after =matrix(1.5378, 0, 0, 1.5378, 0, -0.626453)
+hexRect=[1050,187,67,77]
+VERDICT fill: hex lit OK | tag: visible OK | ico: transformed OK
+logs=none
+svg=<svg class="ihx__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <!-- 第三十九轮：GPT 从 OpenAI 结（simple-icons 多段闭合路径）换成 mingcute:openai-line 单一路径连续线条

@@ -1,0 +1,2 @@
+FATAL: Error: no page target
+    at main (file:///C:/Users/admin/WorkBuddy/2026-09-21-17-41-08/portfolio/_dock.mjs:46:22)

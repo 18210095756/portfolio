@@ -1,0 +1,14 @@
+tag=hx1 viewport=1600x900
+--- home (scrollY=0) ---
+nav      t=0 b=81 h=81
+navRow   left t=23.8 l=41.6 | center t=27.3 l=756.9 | right t=23.8 l=1455.3 => ⚠ NOT one row
+--- intro (scrollY=900 isIntro=true) ---
+htmlClass=is-intro navComputedH=63px
+nav      t=0 b=63 h=63
+panel    t=88.2 l=57.6 r=1542.4 b=842.4 w=1484.8 h=754.2
+GAP nav.bottom->panel.top = 25.2px
+me       t=93.2 b=690.2 w=375.2 h=597
+loc      t=700.1 b=831.5 w=375.2 h=131.4
+me content=674.2/690.2 ok (fits)
+shots=_in_hx1.png + _in_home_hx1.png
+logs=none

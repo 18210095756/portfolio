@@ -18,7 +18,6 @@
 
      .intro__bg       彩虹场        0.4×   位移 5vh  + 放大到 1.06
      .intro__blobs    三团光斑      0.7×   位移 9vh
-     .ihive           蜂巢底纹      0.32×  位移 4vh（面板内）
      .intro__stars    + 十字        0.24×  位移 3vh（身份卡内）
      .ipass__stage    身份卡        0.19×  位移 2.4vh（面板内）
      .intro__panel    暗色面板      ——     不动
@@ -292,27 +291,6 @@
   line-height: 1.75;
   letter-spacing: 0.01em;
   color: rgba(242, 235, 220, 0.56);
-}
-
-.ichips {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(4px, 0.42vw, 7px);
-  margin: clamp(10px, 1.3vh, 17px) 0 0;
-  padding: 0;
-}
-
-.ichips li {
-  font-family: var(--font-ui);
-  font-size: clamp(8.6px, 0.68vw, 11.4px);
-  letter-spacing: 0.02em;
-  color: rgba(242, 235, 220, 0.64);
-  padding: clamp(4px, 0.55vh, 6px) clamp(8px, 0.7vw, 12px);
-  border: 1px solid var(--ihair);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.022);
-  white-space: nowrap;
 }
 
 /* ---- 所在地 ---- */
@@ -657,23 +635,6 @@
   text-overflow: ellipsis;
 }
 
-/* 全息小圆贴（右上角） */
-.ipass__sticker {
-  position: absolute;
-  right: clamp(9px, 1vw, 15px);
-  top: clamp(9px, 1.3vh, 16px);
-  width: clamp(15px, 1.4vw, 23px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 210deg,
-    #ff9ad5, #ffe08a, #9dffc7, #8ad4ff, #c9a6ff, #ff9ad5
-  );
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
-    0 2px 10px rgba(0, 0, 0, 0.35);
-}
-
 /* 塑料面反光：一道斜向高光 */
 .ipass__gloss {
   position: absolute;
@@ -795,94 +756,136 @@
    ============================================================ */
 
 .ibox--social {
-  /* 固定占右栏 44%，剩下的都给作品列表 —— 两栏都 flex:1 的话图标卡会被
-     撑得空荡荡（六边形底纹是背景，不需要靠高度撑）。 */
+  /* 固定占右栏 44%，剩下的都给作品列表。蜂窝簇用 absolute + margin:auto
+     自己居中，这里不再需要 flex。 */
   flex: 0 0 44%;
   min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: clamp(10px, 1vw, 18px);
 }
 
-.ihive {
+/* ---- 蜂窝社交卡（第三十二轮重做，参考 reactbits HexagonGrid 观感） ----
+   满铺六边形底纹已删。现在是一簇 2+3+2 的蜂窝格位：
+   格心横向间距 = 六边形宽 W，行距 = 0.866W（尖顶六边形几何），
+   簇 aspect-ratio 1.2 把这套比例锁死 —— 格位全用 %，簇随卡缩放不变形。
+   第三十三轮：簇收小（min(74%,23rem)），并按用户要求去掉滚动视差 ——
+   面板钉住时它不随 --intro-p 位移，安安静静待在卡里。 */
+.isocial {
   position: absolute;
   inset: 0;
-  transform: translate3d(0, calc(var(--intro-p) * -4vh), 0) scale(1.04);
+  margin: auto;
+  height: min(74%, 23rem);
+  aspect-ratio: 1.2;
+  max-width: 100%;
+  list-style: none;
+}
+
+/* 单个格位：--cx/--cy 是格心坐标（%），格距锁 30%（蜂窝几何），
+   六边形本身 26.5% —— 比格距略小，格与格之间留出参考图那样的暗缝。 */
+.ihx {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  width: 26.5%;
+  translate: -50% -50%;
+  aspect-ratio: 87 / 100;
+}
+
+/* 淡描边六边形：默认若隐若现，悬停亮起成"底座"。
+   --hmag 由 honeycomb-dock.js 按鼠标距离驱动（Dock 放大镜），无 JS 时恒 1。 */
+.ihx__hex {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: rgba(242, 235, 220, 0);
+  stroke: rgba(242, 235, 220, 0.10);
+  stroke-width: 1.2;
+  pointer-events: none;
+  transform: scale(var(--hmag, 1));
+  transform-origin: 50% 50%;   /* 相对 viewBox 中心 = 六边形几何中心 */
+  transition: fill 0.3s ease, stroke 0.3s ease;
+}
+
+/* 命中层（span，纯视觉、无点击跳转）：clip-path 把命中区域裁成六边形本身（矩形误触不点亮）。 */
+.ihx__lnk {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(242, 235, 220, 0.62);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  transition: color 0.3s ease;
+}
+
+/* 图标缩放由 honeycomb-dock.js 的 --mag 连续驱动（鼠标越近越大，峰值 1.6），
+   放大时轻微上浮；不能加 transition —— 会和每帧 lerp 打架。 */
+.ihx__ico {
+  width: 34%;
+  height: auto;
+  display: block;
+  transform: translateY(calc((var(--mag, 1) - 1) * -5%)) scale(var(--mag, 1));
   will-change: transform;
 }
 
-.isocial {
-  position: relative;
-  list-style: none;
-  margin: 0;
-  padding: 0 0 13%;   /* 中列上提之后下面要留出等量的空，否则被裁 */
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(5px, 0.7vw, 13px);
-  /* 第一版放到 292px 宽、图标只有 22px，格距是图标 4 倍，整簇散掉了。
-     收到 13vw 之后格距约 2.9 倍，才像参考里那样"一簇"。 */
-  width: min(100%, clamp(170px, 15.5vw, 262px));
-}
-
-.isocial li {
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-}
-
-/* 中列整体上提 → 3 列变蜂窝 */
-.isocial li:nth-child(3n + 2) {
-  transform: translateY(-42%);
-}
-
-.isocial a {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  border-radius: 16px;
-  color: rgba(242, 235, 220, 0.6);
-  transition: color 0.3s ease, background 0.3s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.isocial svg {
-  width: clamp(16px, 1.65vw, 27px);
-  height: auto;
-  display: block;
-}
-
-.isocial a:hover {
-  color: var(--cream);
-  background: rgba(242, 235, 220, 0.06);
-  transform: scale(1.07);
-}
-
-.isocial a::after {
-  content: attr(data-tip);
+/* 标签（参考图里 X.COM 那颗）：坐在六边形下三角里，悬停浮出。 */
+.ihx__tag {
   position: absolute;
   left: 50%;
-  top: calc(100% + 3px);
-  transform: translate(-50%, 4px);
+  bottom: 12%;
+  translate: -50% 4px;
   font-family: var(--font-ui);
-  font-size: clamp(8px, 0.6vw, 10px);
-  letter-spacing: 0.06em;
+  font-size: clamp(8px, 0.62vw, 10px);
+  letter-spacing: 0.14em;
   color: var(--cream);
-  background: rgba(12, 12, 16, 0.94);
-  border: 1px solid var(--ihair-2);
-  border-radius: 999px;
-  padding: 3px 8px;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  transition: opacity 0.24s ease, translate 0.24s ease;
 }
 
-.isocial a:hover::after,
-.isocial a:focus-visible::after {
+/* hex 在 DOM 里排在 lnk 前面（视觉底层），~ 够不着它 —— 用 :has() 反向选。
+   （:focus-visible 分支保留着：格位现在不可聚焦（span），若以后加回 tabindex 就能用。） */
+.ihx:has(.ihx__lnk:hover) .ihx__hex,
+.ihx:has(.ihx__lnk:focus-visible) .ihx__hex {
+  fill: rgba(242, 235, 220, 0.10);
+  stroke: rgba(242, 235, 220, 0.48);
+}
+
+.ihx__lnk:hover,
+.ihx__lnk:focus-visible {
+  color: var(--cream);
+}
+
+/* 图标的放大交给 --mag（Dock 效果连续驱动），hover 不再单独写 transform ——
+   被 hover 的格距离必然为 0，--mag 自然就是峰值。 */
+
+.ihx__lnk:hover ~ .ihx__tag,
+.ihx__lnk:focus-visible ~ .ihx__tag {
   opacity: 1;
-  transform: translate(-50%, 0);
+  translate: -50% 0;
+}
+
+/* 中心装饰彩球（参考图正中的渐变球）：占"中心格"，不参与悬停。
+   缓慢 hue 旋转让它是活的；reduce 下停（见底部 reduce 块）。 */
+.ihx__orb {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: 50%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 44%),
+    conic-gradient(from 210deg, #a98cf0, #f687b0, #f5a552, #eed44a, #63d8bd, #7aa9f0, #a98cf0);
+  box-shadow:
+    0 0 22px rgba(169, 140, 240, 0.32),
+    0 0 58px rgba(246, 135, 176, 0.16);
+  animation: orbhue 16s linear infinite;
+}
+
+@keyframes orbhue {
+  to { filter: hue-rotate(360deg); }
 }
 
 /* ---- 作品总览预览卡（haoqi.design 项目窗效果，第二十七轮） ----
@@ -919,29 +922,14 @@
 .ibox--works:hover::before { opacity: 0; }
 .ibox--works:hover::after { opacity: 1; }
 
-/* 正常态：预览图。现在是占位（深蓝点阵画布 + 淡窗口线框），
-   换真图把 background 换成 url("../img/works-overview.jpg") center / cover no-repeat。 */
+/* 正常态：作品预览图（第四十二轮：换成真实作品图 works-overview.jpg，
+   占位深蓝点阵已移除；悬停时整块淡入奶油色见下方 .iwks__solid）。 */
 .iwks__img {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background:
-    radial-gradient(rgba(99, 118, 216, 0.32) 1px, transparent 1.4px) 0 0 / 14px 14px,
-    linear-gradient(178deg, #14152b 0%, #101123 55%, #0d0e1e 100%);
+  background: url("../img/works-overview.jpg") center / cover no-repeat;
   transition: opacity 0.45s ease;
-}
-
-/* 占位用的窗口线框（换真图后可整段删掉） */
-.iwks__img::after {
-  content: "";
-  position: absolute;
-  left: 13%;
-  right: 13%;
-  top: 15%;
-  bottom: 19%;
-  border: 1px solid rgba(216, 212, 206, 0.2);
-  border-radius: 6px;
-  background: linear-gradient(rgba(216, 212, 206, 0.09) 0 0) 0 0 / 100% 22px no-repeat;
 }
 
 /* 悬停态：整块米白纯色 */
@@ -1041,7 +1029,7 @@
     padding: clamp(14px, 5.5vh, 56px) max(0px, calc((100% - 46vh) / 2));
   }
 
-  .ihive { opacity: 0.75; }
+  .isocial { opacity: 0.75; }
 }
 
 @media (max-height: 760px) and (min-width: 901px) {
@@ -1083,7 +1071,6 @@
   .intro__bg,
   .intro__blobs,
   .intro__stars,
-  .ihive,
   .ipass__stage {
     transform: none;
     will-change: auto;
@@ -1111,21 +1098,22 @@
   }
   /* 桌面那句 flex:0 0 44% 是按"三栏里占右栏 44% 高"算的，单栏下没有意义，
      必须放回来让高度由内容决定。 */
-  .ibox--social { flex: 0 0 auto; min-height: 40vh; }
-  .isocial { width: min(100%, 240px); }
+  .ibox--social { flex: 0 0 auto; min-height: 46vh; }
+  /* 蜂窝簇在单栏里收小一点，别顶着卡边。 */
+  .isocial { height: min(68%, 19rem); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .intro__bg,
   .intro__blobs,
   .intro__stars,
-  .ihive,
   .ipass__stage {
     transform: none;
     will-change: auto;
   }
 
   .intro__blob { animation: none; }
+  .ihx__orb { animation: none; }
 
   /* 工牌：钟摆停住、指针跟随停用（停在正面）；scroll.js 在 reduce 下也不写变量 */
   .ipass__badge { animation: none; }

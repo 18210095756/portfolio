@@ -248,21 +248,12 @@
             <p class="ibox__handle">@liuyiran</p>
             <h2 class="ime">
               <span class="ime__l1">你好！</span>
-              <span class="ime__l2">我是怡然</span>
+              <span class="ime__l2">我是刘怡然</span>
             </h2>
             <div class="ime__air" aria-hidden="true"></div>
             <p class="ibox__desc">
-              10+ 年线下展厅与品牌空间经验。聚焦大屏交互 UI 与空间叙事，兼顾硬件限制、
-              现场访客行为与企业叙事，把数字界面从创意一路做到展厅现场落地。
+              本科毕业于四川美术学院数字媒体艺术系，现任风语筑互动科技部UI设计师。两年视觉设计经验。参与广东小鹏企业展厅、成都腾讯企业馆等大型落地项目，并深度介入公司AI工作流研发。聚焦UI交互与空间叙事，兼顾硬件限制与企业调性，把界面从创意做到现场落地。
             </p>
-            <ul class="ichips">
-              <li>交互设计</li>
-              <li>大屏 UI</li>
-              <li>空间叙事</li>
-              <li>动效设计</li>
-              <li>Figma</li>
-              <li>TouchDesigner</li>
-            </ul>
           </article>
 
           <article class="ibox ibox--loc">
@@ -313,7 +304,6 @@
                         <b>互动科技部 / 视觉设计师</b>
                         <i>上海 · 中国</i>
                       </span>
-                      <span class="ipass__sticker" aria-hidden="true"></span>
                       <span class="ipass__gloss" aria-hidden="true"></span>
                     </div>
                   </div>
@@ -353,93 +343,100 @@
           </article>
         </div>
 
-        <!-- ========== 右栏：联系方式蜂巢 / 精选作品 ========== -->
+        <!-- ========== 右栏：常用工具蜂巢 / 精选作品 ========== -->
         <div class="icol icol--right">
 
           <article class="ibox ibox--social">
-            <!-- 六边形底纹：一张无缝平铺的 pattern。tile 74×128，
-                 尖顶正六边形外接圆半径 128/3 = 42.67，√3·a ≈ 74。
-                 5 个多边形分别落在 tile 的四个角与正中，横向周期 √3·a、
-                 纵向周期 3a，接缝处正好被邻格补上。 -->
-            <svg class="ihive" aria-hidden="true" width="100%" height="100%">
-              <defs>
-                <pattern id="hivePat" width="74" height="128" patternUnits="userSpaceOnUse">
-                  <g fill="rgba(255,255,255,.014)" stroke="rgba(242,235,220,.10)" stroke-width="1">
-                    <polygon points="0,-42.7 37,-21.3 37,21.3 0,42.7 -37,21.3 -37,-21.3" />
-                    <polygon points="74,-42.7 111,-21.3 111,21.3 74,42.7 37,21.3 37,-21.3" />
-                    <polygon points="37,21.3 74,42.7 74,85.3 37,106.7 0,85.3 0,42.7" />
-                    <polygon points="0,85.3 37,106.7 37,149.3 0,170.7 -37,149.3 -37,106.7" />
-                    <polygon points="74,85.3 111,106.7 111,149.3 74,170.7 37,149.3 37,106.7" />
-                  </g>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#hivePat)" />
-            </svg>
-
-            <ul class="isocial">
-              <li>
-                <a href="#" data-tip="邮箱" aria-label="邮箱">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2.6" y="5" width="18.8" height="14" rx="2.6" />
-                    <path d="M3.4 6.6 12 13l8.6-6.4" />
+            <!-- 蜂窝工具卡（第三十二轮重做观感；第三十六轮把 6 个图标换成常用工具品牌标识）：
+                 满铺六边形底纹已删 —— 现在每格自带一个淡描边六边形，
+                 7 格 = 2+3+2 三行蜂窝（行距 = 0.866×格宽，簇 aspect-ratio 1.2 锁死比例）。
+                 正中彩球是装饰位（占"中心格"），不参与悬停。
+                 6 格图标 = Figma / Ps / Ai / GPT / 剪映 / Codex，全部按本站奶油色细描边线稿重绘
+                 （stroke-width 逐图标微调：双轮廓或细节密的调细，否则小尺寸下糊成一团）。
+                 命中区域 = `.ihx__lnk` 上的 clip-path 六边形（矩形误触不会点亮）。
+                 第三十七轮：`.ihx__lnk` 由 `<a href="#">` 改为 `<span role="img">` —— 这些格位是
+                 **纯视觉展示，不做任何点击跳转**（原来 href="#" 点了会滚回顶部 / 往 URL 挂 #）。 -->
+            <ul class="isocial" aria-label="常用工具">
+              <li class="ihx" style="--cx:35%;--cy:17%">
+                <svg class="ihx__hex" viewBox="0 0 87 100" aria-hidden="true"><polygon points="43.5,2 85.1,26 85.1,74 43.5,98 1.9,74 1.9,26" /></svg>
+                <span class="ihx__lnk" role="img" aria-label="Figma">
+                  <svg class="ihx__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <g transform="translate(12 12) scale(1.2) translate(-12 -12)">
+                      <path d="M12 3H9a3 3 0 0 0 0 6h3z" />
+                      <path d="M12 3h3a3 3 0 0 1 0 6h-3z" />
+                      <path d="M12 9H9a3 3 0 0 0 0 6h3z" />
+                      <circle cx="15" cy="12" r="3" />
+                      <path d="M9 21a3 3 0 0 0 3-3v-3H9a3 3 0 0 0 0 6z" />
+                    </g>
                   </svg>
-                </a>
+                </span>
+                <span class="ihx__tag" aria-hidden="true">Figma</span>
               </li>
-              <li>
-                <a href="#" data-tip="微信" aria-label="微信">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9.3 3.2c3.9 0 7 2.5 7 5.6 0 .5-.1 1-.2 1.5" />
-                    <path d="M2.2 8.8c0-3 2.9-5.4 6.4-5.4s6.4 2.4 6.4 5.4-2.9 5.4-6.4 5.4c-.7 0-1.4-.1-2-.3L4 15.2l.9-2.4C3.2 11.9 2.2 10.5 2.2 8.8z" />
-                    <path d="M10.6 15.4c0-2.5 2.4-4.4 5.3-4.4s5.3 2 5.3 4.4-2.4 4.4-5.3 4.4c-.6 0-1.1-.1-1.6-.2l-2.2 1 .7-1.9c-1.4-.8-2.2-2-2.2-3.3z" />
+              <li class="ihx" style="--cx:65%;--cy:17%">
+                <svg class="ihx__hex" viewBox="0 0 87 100" aria-hidden="true"><polygon points="43.5,2 85.1,26 85.1,74 43.5,98 1.9,74 1.9,26" /></svg>
+                <span class="ihx__lnk" role="img" aria-label="Photoshop">
+                  <svg class="ihx__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.85 8.42c-.37-.15-.77-.21-1.18-.2-.26 0-.49 0-.68.01-.2-.01-.34 0-.41.01v3.36c.14.01.27.02.39.02h.53c.39 0 .78-.06 1.15-.18.32-.09.6-.28.82-.53.21-.25.31-.59.31-1.03.01-.31-.07-.62-.23-.89-.17-.26-.41-.46-.7-.57zM19.75.3H4.25C1.9.3 0 2.2 0 4.55v14.899c0 2.35 1.9 4.25 4.25 4.25h15.5c2.35 0 4.25-1.9 4.25-4.25V4.55C24 2.2 22.1.3 19.75.3zm-7.391 11.65c-.399.56-.959.98-1.609 1.22-.68.25-1.43.34-2.25.34-.24 0-.4 0-.5-.01s-.24-.01-.43-.01v3.209c.01.07-.04.131-.11.141H5.52c-.08 0-.12-.041-.12-.131V6.42c0-.07.03-.11.1-.11.17 0 .33 0 .56-.01.24-.01.49-.01.76-.02s.56-.01.87-.02c.31-.01.61-.01.91-.01.82 0 1.5.1 2.06.31.5.17.96.45 1.34.82.32.32.57.71.73 1.14.149.42.229.85.229 1.3.001.86-.199 1.57-.6 2.13zm7.091 3.89c-.28.4-.671.709-1.12.891-.49.209-1.09.318-1.811.318-.459 0-.91-.039-1.359-.129-.35-.061-.7-.17-1.02-.32-.07-.039-.121-.109-.111-.189v-1.74c0-.029.011-.07.041-.09.029-.02.06-.01.09.01.39.23.8.391 1.24.49.379.1.779.15 1.18.15.38 0 .65-.051.83-.141.16-.07.27-.24.27-.42 0-.141-.08-.27-.24-.4-.16-.129-.489-.279-.979-.471-.51-.18-.979-.42-1.42-.719-.31-.221-.569-.51-.761-.85-.159-.32-.239-.67-.229-1.021 0-.43.12-.84.341-1.21.25-.4.619-.72 1.049-.92.469-.239 1.059-.349 1.769-.349.41 0 .83.03 1.24.09.3.04.59.12.86.23.039.01.08.05.1.09.01.04.02.08.02.12v1.63c0 .04-.02.08-.05.1-.09.02-.14.02-.18 0-.3-.16-.62-.27-.96-.34-.37-.08-.74-.13-1.12-.13-.2-.01-.41.02-.601.07-.129.03-.24.1-.31.2-.05.08-.08.18-.08.27s.04.18.101.26c.09.11.209.2.34.27.229.12.47.23.709.33.541.18 1.061.43 1.541.73.33.209.6.49.789.83.16.318.24.67.23 1.029.011.471-.129.94-.389 1.331z" />
                   </svg>
-                </a>
+                </span>
+                <span class="ihx__tag" aria-hidden="true">Photoshop</span>
               </li>
-              <li>
-                <a href="#" data-tip="B 站" aria-label="B 站">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2.6" y="6.6" width="18.8" height="13.2" rx="3.4" />
-                    <path d="M7.4 2.9 10.3 6M16.6 2.9 13.7 6" />
-                    <path d="M8.2 12.2v2.4M15.8 12.2v2.4" />
+              <li class="ihx" style="--cx:20%;--cy:48%">
+                <svg class="ihx__hex" viewBox="0 0 87 100" aria-hidden="true"><polygon points="43.5,2 85.1,26 85.1,74 43.5,98 1.9,74 1.9,26" /></svg>
+                <span class="ihx__lnk" role="img" aria-label="Illustrator">
+                  <svg class="ihx__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M10.53 10.73c-.1-.31-.19-.61-.29-.92-.1-.31-.19-.6-.27-.89-.08-.28-.15-.54-.22-.78h-.02c-.09.43-.2.86-.34 1.29-.15.48-.3.98-.46 1.48-.14.51-.29.98-.44 1.4h2.54c-.06-.211-.14-.46-.23-.721-.09-.269-.18-.559-.27-.859zM19.75.3H4.25C1.9.3 0 2.2 0 4.55v14.9c0 2.35 1.9 4.25 4.25 4.25h15.5c2.35 0 4.25-1.9 4.25-4.25V4.55C24 2.2 22.1.3 19.75.3zM14.7 16.83h-2.091c-.069.01-.139-.04-.159-.11l-.82-2.38H7.91l-.76 2.35c-.02.09-.1.15-.19.141H5.08c-.11 0-.14-.061-.11-.18L8.19 7.38c.03-.1.06-.21.1-.33.04-.21.06-.43.06-.65-.01-.05.03-.1.08-.11h2.59c.08 0 .12.03.13.08l3.65 10.3c.03.109 0 .16-.1.16zm3.4-.15c0 .11-.039.16-.129.16H16.01c-.1 0-.15-.061-.15-.16v-7.7c0-.1.041-.14.131-.14h1.98c.09 0 .129.05.129.14v7.7zm-.209-9.03c-.231.24-.571.37-.911.35-.33.01-.65-.12-.891-.35-.23-.25-.35-.58-.34-.92-.01-.34.12-.66.359-.89.242-.23.562-.35.892-.35.391 0 .689.12.91.35.22.24.34.56.33.89.01.34-.11.67-.349.92z" />
                   </svg>
-                </a>
+                </span>
+                <span class="ihx__tag" aria-hidden="true">Illustrator</span>
               </li>
-              <li>
-                <a href="#" data-tip="小红书" aria-label="小红书">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3.4" width="18" height="17.2" rx="4.4" />
-                    <path d="M7.6 8.2v7.6M12 7.4v8.8M16.4 10.2v5.2" />
-                  </svg>
-                </a>
+              <li class="ihx ihx--orb" style="--cx:50%;--cy:48%" aria-hidden="true">
+                <span class="ihx__orb"></span>
               </li>
-              <li>
-                <a href="#" data-tip="微博" aria-label="微博">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="10.6" cy="13" r="6.4" />
-                    <path d="M10.6 9.4v4.2l3 1.8" />
-                    <path d="M15.6 4.6c2.9-.6 5 1 5.1 3.6M15.9 7.6c1.4-.3 2.4.5 2.5 1.8" />
+              <li class="ihx" style="--cx:80%;--cy:48%">
+                <svg class="ihx__hex" viewBox="0 0 87 100" aria-hidden="true"><polygon points="43.5,2 85.1,26 85.1,74 43.5,98 1.9,74 1.9,26" /></svg>
+                <span class="ihx__lnk" role="img" aria-label="GPT">
+                  <svg class="ihx__ico" style="width:42%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0"
+                       stroke-linejoin="round" aria-hidden="true">
+                    <!-- 第三十九轮：GPT 换成 streamline-logos:openai-logo 单线版（中心六边结+六弧），与参考图一致；
+                         第四十轮：该路径弧线内收占位仅 0.77，视觉比 Ps/Ai(0.98) 小。
+                         第四十一轮：内层 <g> scale 会把弧线推出 viewBox 裁掉（边缘缺失），
+                         改为内联 width:42% 覆盖通用 34% —— 元素整体变大、viewBox 不变、不裁边。 -->
+                    <path d="M12.019 16.225L8.35 14.13m3.669 2.096l3.65-2.129m-3.65 2.13L9.183 17.88l-5.196-3a5 5 0 0 1-.714-.498m5.077-.252L5.5 12.5v-6q0-.444.075-.867m2.775 8.496l-.018-4.225m5.97-6.652a5.001 5.001 0 0 0-8.727 2.38m8.727-2.38a5 5 0 0 0-.789.369l-5.196 3l.015 3.283m5.97-6.652a5.001 5.001 0 0 1 6.425 6.367M5.575 5.633a5.001 5.001 0 0 0-2.302 8.748m8.708-6.606l3.669 2.096m-3.67-2.096L8.33 9.904m3.65-2.129l2.836-1.654l5.196 3q.384.223.714.498m-5.077.252L18.5 11.5v6q0 .444-.075.867M15.65 9.871l.018 4.225m-5.97 6.652a5.001 5.001 0 0 0 8.727-2.38m-8.727 2.38a5 5 0 0 0 .789-.369l5.196-3l-.015-3.283m-5.97 6.652a5.001 5.001 0 0 1-6.425-6.367m15.152 3.986a5.001 5.001 0 0 0 2.302-8.748" />
                   </svg>
-                </a>
+                </span>
+                <span class="ihx__tag" aria-hidden="true">GPT</span>
               </li>
-              <li>
-                <a href="#" data-tip="作品集" aria-label="作品集">
-                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M12 1.8l1.9 6.7 6.4 2.2-6.4 2.2L12 19.6l-1.9-6.7L3.7 10.7l6.4-2.2z" />
+              <li class="ihx" style="--cx:35%;--cy:79%">
+                <svg class="ihx__hex" viewBox="0 0 87 100" aria-hidden="true"><polygon points="43.5,2 85.1,26 85.1,74 43.5,98 1.9,74 1.9,26" /></svg>
+                <span class="ihx__lnk" role="img" aria-label="剪映">
+                  <svg class="ihx__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M24.189 6.442V2.671l-4.535 2.383V4.91c.002-1.505-1.078-2.411-2.638-2.411H2.64C.993 2.5 0 3.407 0 4.91v3.81L6.354 12L0 15.316v3.8C0 20.595 1 21.5 2.64 21.5h14.373c1.56 0 2.639-.907 2.639-2.382v-.197l4.536 2.409v-3.828L13.64 12l10.55-5.557zM9.982 13.873l7.797 4.083H2.157zm7.741-7.828l-7.742 4.057l-7.825-4.057z" />
                   </svg>
-                </a>
+                </span>
+                <span class="ihx__tag" aria-hidden="true">剪映</span>
+              </li>
+              <li class="ihx" style="--cx:65%;--cy:79%">
+                <svg class="ihx__hex" viewBox="0 0 87 100" aria-hidden="true"><polygon points="43.5,2 85.1,26 85.1,74 43.5,98 1.9,74 1.9,26" /></svg>
+                <span class="ihx__lnk" role="img" aria-label="Codex">
+                  <svg class="ihx__ico" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="13.87"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M86.247 4.886A65.1 65.1 0 0 1 118.737.46c14.219 1.632 26.89 7.68 38.016 18.132c.304.288.733.405 1.141.31c15.019-3.69 29.461-2.39 43.317 3.903l.672.32l1.643.81c14.474 7.5 24.853 18.88 31.125 34.11c2.965 7.243 4.458 14.805 4.49 22.677a60.3 60.3 0 0 1-1.92 17.396c-.148.588.013 1.21.427 1.653a63.8 63.8 0 0 1 16.832 30.835c4.106 20.276-.107 38.558-12.619 54.823l-1.941 2.347a64.67 64.67 0 0 1-31.296 19.743a1.73 1.73 0 0 0-1.152 1.088c-2.72 7.85-5.45 14.548-10.528 21.246c-12.789 16.874-31.594 26.26-52.778 26.145c-16.885-.088-31.85-6.263-44.906-18.519a1.54 1.54 0 0 0-1.493-.34c-5.525 1.78-11.093 2.036-17.11 1.972a63.2 63.2 0 0 1-27.679-6.634a64.6 64.6 0 0 1-22.89-18.996c-2.166-2.87-4.31-5.568-5.878-8.757a82.6 82.6 0 0 1-5.28-13.684a65.2 65.2 0 0 1-.181-32.68a1.8 1.8 0 0 0 .085-.79a1.23 1.23 0 0 0-.394-.683a63.55 63.55 0 0 1-14.72-23.486a55.4 55.4 0 0 1-3.552-16.948a73.8 73.8 0 0 1 2.005-22.74c4.8-15.829 13.963-28.244 27.488-37.257c3.008-2.005 5.867-3.562 8.554-4.671a86 86 0 0 1 9.184-3.243c.447-.132.796-.481.928-.928A64.2 64.2 0 0 1 60.103 24.65c7.253-9.023 15.968-15.614 26.144-19.764M77.67 88.614a9.05 9.05 0 0 0-15.712 8.981l18.07 31.625l-18.006 30.376a9.056 9.056 0 0 0 15.573 9.215l20.693-34.898a9.06 9.06 0 0 0 .075-9.109zm58.09 66.556a9.056 9.056 0 0 0 0 18.079h51.711a9.056 9.056 0 0 0 0-18.09h-51.71z" />
+                  </svg>
+                </span>
+                <span class="ihx__tag" aria-hidden="true">Codex</span>
               </li>
             </ul>
           </article>
 
           <article class="ibox ibox--works">
             <!-- 作品总览预览卡（haoqi.design 项目窗效果）：
-                 平时显示预览图（现在是占位画布），悬停整块淡入本站奶油色，中央「作品总览」标题。
-                 换真图：把 intro.css 里 .iwks__img 的 background 换成
-                 url("../img/works-overview.jpg") center / cover no-repeat 即可。 -->
+                 平时显示作品预览图（第四十二轮：换成真实作品图
+                 assets/img/works-overview.jpg），悬停整块淡入本站奶油色，中央「作品总览」标题。 -->
             <span class="iwks__img" aria-hidden="true"></span>
             <span class="iwks__solid" aria-hidden="true"></span>
             <span class="iwks__ttl">作品总览</span>
@@ -461,6 +458,7 @@
 <script src="assets/js/pillnav.js"></script>
 <script src="assets/js/liquid-btn.js"></script>
 <script src="assets/js/specular-btn.js"></script>
+<script src="assets/js/honeycomb-dock.js"></script>
 <script src="assets/js/scroll.js"></script>
 </body>
 </html>

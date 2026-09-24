@@ -1,2 +1,3 @@
-2026/09/23-00:09:05.609 bd10 Creating DB C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\portfolio\_cdpws_49624\Default\Site Characteristics Database since it was missing.
-2026/09/23-00:09:05.618 bd10 Reusing MANIFEST C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\portfolio\_cdpws_49624\Default\Site Characteristics Database/MANIFEST-000001
+2026/09/23-16:48:00.295 c52c Reusing MANIFEST C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\portfolio\_cdpws_49624\Default\Site Characteristics Database/MANIFEST-000001
+2026/09/23-16:48:00.296 c52c Recovering log #3
+2026/09/23-16:48:00.296 c52c Reusing old log C:\Users\admin\WorkBuddy\2026-09-21-17-41-08\portfolio\_cdpws_49624\Default\Site Characteristics Database/000003.log 
